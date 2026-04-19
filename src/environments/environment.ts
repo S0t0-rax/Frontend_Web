@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8000',
+  apiUrl: 'https://backend-production-a940.up.railway.app',
   allowedRoles: ['admin', 'workshop_owner', 'mechanic'],
 };
