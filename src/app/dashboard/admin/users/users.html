@@ -1,0 +1,116 @@
+<div class="users-container">
+  <header>
+    <h1>Gestión de Usuarios</h1>
+  </header>
+
+  <div class="table-wrapper">
+    <table *ngIf="!isLoading(); else loadingTpl">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre / Email</th>
+          <th>Teléfono</th>
+          <th>Rol Principal</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of users()">
+          <td>#{{ u.id }}</td>
+          <td>
+            <div style="font-weight: 600;">{{ u.full_name }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ u.email }}</div>
+          </td>
+          <td>{{ u.phone || 'N/A' }}</td>
+          <td>
+            <span class="role-badge">
+             {{ roleLabels[u.roles[0] || 'client'] || u.roles[0] }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [class.active]="u.is_active" [class.inactive]="!u.is_active">
+              <span class="status-dot"></span>
+              {{ u.is_active ? 'Activo' : 'Suspendido' }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-icon btn-edit" title="Editar" (click)="selectUser(u)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+              </svg>
+            </button>
+            <button 
+              *ngIf="u.is_active" 
+              class="btn-icon btn-delete" 
+              title="Suspender" 
+              (click)="logicalDelete(u)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </button>
+            <button 
+              *ngIf="!u.is_active" 
+              class="btn-icon btn-restore" 
+              title="Restaurar" 
+              (click)="selectUser(u)"> <!-- Re-using edit to manually activate -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="users().length === 0 && !isLoading()" class="empty-state">
+      No hay usuarios registrados.
+    </div>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="empty-state">Cargando base de datos...</div>
+  </ng-template>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" *ngIf="selectedUser()">
+    <div class="modal-content">
+      <h3>Editar Usuario: {{ selectedUser()?.full_name }}</h3>
+      
+      <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <div class="form-group">
+          <label>Nombre Completo</label>
+          <input type="text" formControlName="full_name" class="theme-input" />
+        </div>
+        
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" formControlName="phone" class="theme-input" />
+        </div>
+        
+        <div class="form-group">
+          <label>Estado Activo</label>
+          <select formControlName="is_active" class="theme-input">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Suspendido</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Rol Principal</label>
+          <select formControlName="role_name" class="theme-input">
+            <option value="admin">Administrador</option>
+            <option value="workshop_owner">Dueño de Taller</option>
+            <option value="mechanic">Mecánico</option>
+            <option value="client">Cliente</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" (click)="closeEdit()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

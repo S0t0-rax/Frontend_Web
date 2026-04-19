@@ -1,0 +1,57 @@
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <section class="welcome-section" id="dashboard-welcome">
+    <div class="welcome-content">
+      <h1>{{ greeting }}, <span class="accent">{{ user?.full_name }}</span></h1>
+      <p class="welcome-subtitle">Bienvenido al panel de gestión de ServMeca</p>
+    </div>
+    <div class="welcome-role-badge" [attr.data-role]="primaryRole">
+      <span class="role-emoji">{{ roleIcons[primaryRole] }}</span>
+      <span>{{ roleLabels[primaryRole] }}</span>
+    </div>
+  </section>
+
+  <!-- Info Cards -->
+  <section class="info-grid">
+    <div class="info-card">
+      <div class="info-icon email-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+      </div>
+      <div class="info-content">
+        <span class="info-label">Correo</span>
+        <span class="info-value">{{ user?.email }}</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon phone-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+      </div>
+      <div class="info-content">
+        <span class="info-label">Teléfono</span>
+        <span class="info-value">{{ user?.phone ?? 'No registrado' }}</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon status-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="info-content">
+        <span class="info-label">Estado</span>
+        <span class="info-value status-active">
+          <span class="status-dot"></span>
+          Activo
+        </span>
+      </div>
+    </div>
+  </section>
+
+
+</div>

@@ -1,0 +1,88 @@
+<div class="bitacora-container">
+  <header>
+    <h1>Bitácora de Auditoría</h1>
+  </header>
+
+  <div class="table-wrapper">
+    <table *ngIf="!isLoading(); else loadingTpl">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario ID</th>
+          <th>Acción</th>
+          <th>Objeto (Entidad)</th>
+          <th>IP Origen</th>
+          <th>Fecha</th>
+          <th>Detalles</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let audit of logs()">
+          <td>#{{ audit.id }}</td>
+          <td>
+            <div style="font-weight: 600;">{{ audit.user_id ? 'Usuario ' + audit.user_id : 'Sistema' }}</div>
+          </td>
+          <td>
+            <span class="action-badge">
+             {{ audit.action }}
+            </span>
+          </td>
+          <td><span class="entity-badge">{{ audit.entity || 'N/A' }}</span></td>
+          <td>{{ audit.ip_address || 'N/A' }}</td>
+          <td class="date-text">{{ audit.created_at | date:'medium' }}</td>
+          <td>
+            <button class="btn-icon" title="Ver Detalles" (click)="viewDetails(audit)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="logs().length === 0 && !isLoading()" class="empty-state">
+      No hay registros en la bitácora.
+    </div>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="empty-state">Descargando registros...</div>
+  </ng-template>
+
+  <!-- Modal Component for Details -->
+  <div class="modal-overlay" *ngIf="selectedLog()">
+    <div class="modal-content wide">
+      <h3>Detalles del Registro #{{ selectedLog()?.id }}</h3>
+      
+      <div class="detail-view">
+        <div class="detail-item">
+          <label>Acción Ejecutada</label>
+          <span>{{ selectedLog()?.action }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Entidad Afectada</label>
+          <span>{{ selectedLog()?.entity || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Fecha del Evento</label>
+          <span>{{ selectedLog()?.created_at | date:'medium' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>IP de Origen</label>
+          <span>{{ selectedLog()?.ip_address || 'Desconocida' }}</span>
+        </div>
+      </div>
+
+      <div class="detail-item" style="margin-bottom: 2rem;">
+        <label>Payload (JSON)</label>
+        <div class="code-block">
+          <pre>{{ selectedLog()?.details | json }}</pre>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" (click)="closeDetails()">Cerrar Panel</button>
+      <div style="clear: both;"></div>
+    </div>
+  </div>
+</div>

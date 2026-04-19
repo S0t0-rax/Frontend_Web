@@ -1,0 +1,107 @@
+<div class="profile-container">
+  <header>
+    <h1>Gestión de Perfil</h1>
+    <p class="subtitle">Administra tus datos personales y seguridad de tu cuenta</p>
+  </header>
+
+  <div class="profile-card">
+    <nav class="tabs">
+      <button 
+        [class.active]="activeTab() === 'data'" 
+        (click)="activeTab.set('data')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Datos de Cuenta
+      </button>
+      <button 
+        [class.active]="activeTab() === 'security'" 
+        (click)="activeTab.set('security')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Seguridad
+      </button>
+    </nav>
+
+    <div class="tab-content">
+      <!-- Datos de Cuenta -->
+      <div *ngIf="activeTab() === 'data'" class="form-wrapper">
+        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+          <div class="form-group">
+            <label for="full_name">Nombre Completo</label>
+            <input 
+              type="text" 
+              id="full_name" 
+              formControlName="full_name" 
+              placeholder="Tu nombre completo"
+              class="theme-input">
+            <span class="error-text" *ngIf="profileForm.get('full_name')?.touched && profileForm.get('full_name')?.invalid">
+              El nombre es requerido (mín. 2 caracteres)
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Teléfono</label>
+            <input 
+              type="text" 
+              id="phone" 
+              formControlName="phone" 
+              placeholder="Ej: +593 999999999"
+              class="theme-input">
+          </div>
+
+          <div class="message" [class]="profileMessage()?.type" *ngIf="profileMessage()">
+            {{ profileMessage()?.text }}
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isProfileLoading()">
+            <span *ngIf="!isProfileLoading()">Guardar Cambios</span>
+            <span *ngIf="isProfileLoading()">Actualizando...</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Seguridad -->
+      <div *ngIf="activeTab() === 'security'" class="form-wrapper">
+        <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()">
+          <div class="form-group">
+            <label for="current_password">Contraseña Actual</label>
+            <input 
+              type="password" 
+              id="current_password" 
+              formControlName="current_password" 
+              class="theme-input">
+          </div>
+
+          <div class="form-group">
+            <label for="new_password">Nueva Contraseña</label>
+            <input 
+              type="password" 
+              id="new_password" 
+              formControlName="new_password" 
+              class="theme-input">
+            <span class="info-text">Mínimo 8 caracteres</span>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirmar Nueva Contraseña</label>
+            <input 
+              type="password" 
+              id="confirm_password" 
+              formControlName="confirm_password" 
+              class="theme-input">
+            <span class="error-text" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirm_password')?.touched">
+              Las contraseñas no coinciden
+            </span>
+          </div>
+
+          <div class="message" [class]="passwordMessage()?.type" *ngIf="passwordMessage()">
+            {{ passwordMessage()?.text }}
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid || isPasswordLoading()">
+            <span *ngIf="!isPasswordLoading()">Cambiar Contraseña</span>
+            <span *ngIf="isPasswordLoading()">Actualizando...</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
