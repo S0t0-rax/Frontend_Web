@@ -22,6 +22,14 @@ export const routes: Routes = [
       { path: '', component: Home },
       { path: 'admin/users', component: Users, canActivate: [adminGuard] },
       { path: 'admin/bitacora', component: Bitacora, canActivate: [adminGuard] },
+      { 
+        path: 'incidents/available', 
+        loadComponent: () => import('./dashboard/incidents/available/available').then(m => m.AvailableIncidentsComponent) 
+      },
+      { 
+        path: 'incidents/management', 
+        loadComponent: () => import('./dashboard/incidents/management/management').then(m => m.IncidentManagementComponent) 
+      },
       { path: 'profile', component: Profile }
     ]
   },
