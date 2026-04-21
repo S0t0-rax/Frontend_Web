@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IncidentService } from '../../../core/services/incident.service';
 import { Incident } from '../../../core/models/incident.model';
-import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card.ts';
+import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card';
 
 @Component({
   selector: 'app-available-incidents',
