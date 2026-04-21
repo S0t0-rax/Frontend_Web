@@ -8,7 +8,7 @@ import { Workshop, WorkshopCreate, WorkshopUpdate } from '../models/workshop.mod
   providedIn: 'root'
 })
 export class WorkshopService {
-  private readonly apiUrl = `${environment.apiUrl}/workshops`;
+  private readonly apiUrl = `${environment.apiUrl}/api/v1/workshops/`;
 
   constructor(private readonly http: HttpClient) {}
 

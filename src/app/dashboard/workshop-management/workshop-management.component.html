@@ -1,60 +1,61 @@
 <div class="workshop-container">
   <div class="header">
-    <h1>🏭 Gestión de Mi Taller</h1>
-    <p>Configura los datos de tu mecánica para que los clientes puedan encontrarte en el mapa.</p>
+    <h1>🏭 Mi Mecánica</h1>
+    <p>Gestiona la identidad de tu negocio y permite que los clientes te ubiquen en Santa Cruz.</p>
   </div>
 
   @if (isLoading()) {
     <div class="loading-state">
       <div class="spinner"></div>
-      <p>Cargando información del taller...</p>
+      <p>Consultando registros...</p>
     </div>
   } @else {
     <form [formGroup]="workshopForm" (ngSubmit)="onSubmit()" class="premium-card">
       <div class="form-grid">
         <div class="form-group full-width">
-          <label for="name">Nombre de la Mecánica</label>
-          <input id="name" type="text" formControlName="name" placeholder="Ej: Mecánica Central">
+          <label for="name">Nombre Comercial</label>
+          <input id="name" type="text" formControlName="name" placeholder="Ej: Talleres Santa Cruz">
           @if (workshopForm.get('name')?.touched && workshopForm.get('name')?.invalid) {
             <span class="error-text">El nombre es obligatorio.</span>
           }
         </div>
 
         <div class="form-group">
-          <label for="tax_id">NIT / Identificación Tributaria</label>
-          <input id="tax_id" type="text" formControlName="tax_id" placeholder="NIT o RUT">
+          <label for="tax_id">Identificación Fiscal (NIT)</label>
+          <input id="tax_id" type="text" formControlName="tax_id" placeholder="Opcional">
         </div>
 
         <div class="form-group">
-          <label for="address">Dirección Física</label>
-          <input id="address" type="text" formControlName="address_text" placeholder="Calle, Número, Ciudad">
+          <label for="address">Dirección Referencial</label>
+          <input id="address" type="text" formControlName="address_text" placeholder="Calle, Barrio, Zona">
           @if (workshopForm.get('address_text')?.touched && workshopForm.get('address_text')?.invalid) {
             <span class="error-text">La dirección es necesaria.</span>
           }
         </div>
 
         <div class="section-divider full-width">
-          <h3>📍 Ubicación en el Mapa</h3>
-          <p>Extrae las coordenadas de Google Maps y pégalas aquí.</p>
+          <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Selección Geográfica</h3>
+          <p>Haz clic en el mapa exactamente sobre la ubicación de tu taller para capturar las coordenadas.</p>
+        </div>
+
+        <div class="full-width map-wrapper">
+          <div id="map"></div>
         </div>
 
         <div class="form-group">
-          <label for="latitude">Latitud</label>
-          <input id="latitude" type="number" step="any" formControlName="latitude" placeholder="-17.3821">
+          <label for="latitude">Latitud (Auto)</label>
+          <input id="latitude" type="number" formControlName="latitude" readonly>
         </div>
 
         <div class="form-group">
-          <label for="longitude">Longitud</label>
-          <input id="longitude" type="number" step="any" formControlName="longitude" placeholder="-66.1524">
+          <label for="longitude">Longitud (Auto)</label>
+          <input id="longitude" type="number" formControlName="longitude" readonly>
         </div>
       </div>
 
       <div class="actions">
-        <button type="button" class="btn-secondary" (click)="openCoordinatesGuide()">
-          🔍 Buscar coordenadas en Maps
-        </button>
         <button type="submit" class="btn-primary" [disabled]="workshopForm.invalid || isSaving()">
-          {{ isSaving() ? 'Guardando...' : (workshop() ? 'ACTUALIZAR DATOS' : 'REGISTRAR TALLER') }}
+          {{ isSaving() ? 'PROCESANDO...' : (workshop() ? 'GUARDAR CAMBIOS' : 'REGISTRAR TALLER') }}
         </button>
       </div>
 
