@@ -4,7 +4,6 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { WorkshopService } from '../../core/services/workshop.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Workshop } from '../../core/models/workshop.model';
-import * as L from 'leaflet';
 
 @Component({
   selector: 'app-workshop-management',
@@ -22,8 +21,9 @@ export class WorkshopManagementComponent implements OnInit, AfterViewInit, OnDes
   isSaving = signal(false);
   message = signal({ text: '', type: '' });
 
-  private map?: L.Map;
-  private marker?: L.Marker;
+  private map?: any;
+  private marker?: any;
+  private L?: any; // Referencia a la librería Leaflet cargada dinámicamente
   private readonly defaultCenter: [number, number] = [-17.7833, -63.1821]; // Santa Cruz, Bolivia
 
   constructor(
@@ -56,36 +56,64 @@ export class WorkshopManagementComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
-  private initMap(): void {
-    this.map = L.map('map', {
+  private async initMap(): Promise<void> {
+    // Importación dinámica para evitar errores en SSR (Vercel)
+    this.L = await import('leaflet');
+
+    this.map = this.L.map('map', {
       center: this.defaultCenter,
       zoom: 13,
       zoomControl: true
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(this.map);
 
-    // Ícono personalizado para evitar problemas de rutas de assets en producción
-    const pinIcon = L.divIcon({
+    const pinIcon = this.L.divIcon({
       className: 'custom-div-icon',
       html: "<div style='background-color:#3b82f6;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);'></div>",
       iconSize: [20, 20],
       iconAnchor: [10, 10]
     });
 
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
+    this.map.on('click', (e: any) => {
       const { lat, lng } = e.latlng;
       this.updateCoordinates(lat, lng);
       
       if (this.marker) {
         this.marker.setLatLng(e.latlng);
       } else {
-        this.marker = L.marker(e.latlng, { icon: pinIcon }).addTo(this.map!);
+        this.marker = this.L.marker(e.latlng, { icon: pinIcon }).addTo(this.map!);
       }
     });
+
+    // Si ya hay datos cargados, posicionar el marcador
+    const currentWs = this.workshop();
+    if (currentWs?.latitude && currentWs?.longitude) {
+      this.setMarkerAt(currentWs.latitude, currentWs.longitude);
+    }
+  }
+
+  private setMarkerAt(lat: number, lng: number): void {
+    if (!this.map || !this.L) return;
+    
+    const pos = [lat, lng];
+    this.map.setView(pos, 16);
+    
+    const pinIcon = this.L.divIcon({
+      className: 'custom-div-icon',
+      html: "<div style='background-color:#3b82f6;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);'></div>",
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    if (this.marker) {
+      this.marker.setLatLng(pos);
+    } else {
+      this.marker = this.L.marker(pos, { icon: pinIcon }).addTo(this.map);
+    }
   }
 
   private updateCoordinates(lat: number, lng: number): void {
@@ -105,19 +133,8 @@ export class WorkshopManagementComponent implements OnInit, AfterViewInit, OnDes
           this.workshop.set(myWs);
           this.workshopForm.patchValue(myWs);
           
-          if (this.map && myWs.latitude && myWs.longitude) {
-            const pos = L.latLng(myWs.latitude, myWs.longitude);
-            this.map.setView(pos, 16);
-            if (this.marker) this.marker.setLatLng(pos);
-            else {
-               const pinIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: "<div style='background-color:#3b82f6;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);'></div>",
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-              });
-              this.marker = L.marker(pos, { icon: pinIcon }).addTo(this.map);
-            }
+          if (isPlatformBrowser(this.platformId) && myWs.latitude && myWs.longitude) {
+            this.setMarkerAt(myWs.latitude, myWs.longitude);
           }
         }
         this.isLoading.set(false);
