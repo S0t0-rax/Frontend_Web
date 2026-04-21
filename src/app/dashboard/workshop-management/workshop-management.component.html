@@ -40,6 +40,23 @@
 
         <div class="full-width map-wrapper">
           <div id="map"></div>
+          
+          <!-- Capas de retroalimentación -->
+          @if (mapStatus() === 'loading') {
+            <div class="map-overlay loading">
+              <div class="spinner small"></div>
+              <p>Cargando motor de mapas...</p>
+            </div>
+          }
+          
+          @if (mapStatus() === 'error') {
+            <div class="map-overlay error">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p>No se pudo cargar el mapa</p>
+              <span class="error-detail">{{ mapError() }}</span>
+              <button type="button" (click)="retryMap()" class="btn-retry">🔄 Reintentar</button>
+            </div>
+          }
         </div>
 
         <div class="form-group">

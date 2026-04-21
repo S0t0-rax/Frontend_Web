@@ -20,8 +20,9 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   isLoading = signal(false);
   isSaving = signal(false);
   message = signal({ text: '', type: '' });
-
-  private map?: any;
+  mapStatus = signal<'loading' | 'ready' | 'error'>('loading');
+  mapError = signal<string | null>(null);
+  map?: any;
   private marker?: any;
   private L?: any;
   private readonly defaultCenter: [number, number] = [-17.7833, -63.1821]; // Santa Cruz
@@ -53,12 +54,23 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   private async initMap(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
     
-    // Pequeña espera para asegurar que el DOM con id='map' ya esté renderizado por el @else
+    this.mapStatus.set('loading');
+    this.mapError.set(null);
+
     setTimeout(async () => {
       try {
-        this.L = await import('leaflet');
+        console.log('Iniciando carga de Leaflet...');
+        const leafletModule = await import('leaflet');
+        // Manejar diferencias entre ESM y CommonJS para obtener el objeto L
+        this.L = leafletModule.default || leafletModule;
+        
+        console.log('Leaflet cargado exitosamente. Inicializando mapa...');
 
-        // Eliminar mapa antiguo si existe para evitar 'Map container is already initialized'
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+          throw new Error('No se encontró el elemento DOM con id "map"');
+        }
+
         if (this.map) {
           this.map.remove();
         }
@@ -67,12 +79,13 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
           center: this.defaultCenter,
           zoom: 13,
           zoomControl: true,
-          fadeAnimation: false // Desactivamos animaciones de entrada para carga instantánea
+          fadeAnimation: false
         });
 
-        this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '© OpenStreetMap'
+        this.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+          subdomains: 'abcd',
+          maxZoom: 20
         }).addTo(this.map);
 
         const pinIcon = this.L.divIcon({
@@ -85,27 +98,31 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
         this.map.on('click', (e: any) => {
           const { lat, lng } = e.latlng;
           this.updateCoordinates(lat, lng);
-          
-          if (this.marker) {
-            this.marker.setLatLng(e.latlng);
-          } else {
-            this.marker = this.L.marker(e.latlng, { icon: pinIcon }).addTo(this.map!);
-          }
+          if (this.marker) this.marker.setLatLng(e.latlng);
+          else this.marker = this.L.marker(e.latlng, { icon: pinIcon }).addTo(this.map!);
         });
 
-        // Si ya hay datos cargados, posicionar el marcador
         const currentWs = this.workshop();
         if (currentWs?.latitude && currentWs?.longitude) {
           this.setMarkerAt(currentWs.latitude, currentWs.longitude);
         }
 
-        // Forzar recalculo de dimensiones para que se vea completo
-        setTimeout(() => this.map.invalidateSize(), 200);
+        setTimeout(() => {
+          this.map.invalidateSize();
+          this.mapStatus.set('ready');
+        }, 200);
 
-      } catch (e) {
-        console.error('Error inicializando mapa:', e);
+      } catch (e: any) {
+        console.error('Error FATAL inicializando mapa:', e);
+        this.mapStatus.set('error');
+        this.mapError.set(e.message || 'Error desconocido');
       }
-    }, 100);
+    }, 300); // Aumentamos un poco el delay para seguridad
+  }
+
+  // Método público para el botón de reintento en HTML
+  retryMap(): void {
+    this.initMap();
   }
 
   private setMarkerAt(lat: number, lng: number): void {
