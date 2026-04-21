@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ROLE_LABELS, ROLE_ICONS } from '../../core/models/auth.model';
@@ -8,7 +7,7 @@ import { ROLE_LABELS, ROLE_ICONS } from '../../core/models/auth.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

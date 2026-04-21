@@ -3,7 +3,7 @@ export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
 
 export interface IncidentPhoto {
   id: number;
-  storage_url: str;
+  storage_url: string;
   ai_detected_issue?: string;
   ai_confidence_score?: number;
   ai_metadata?: any;
