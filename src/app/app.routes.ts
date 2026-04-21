@@ -9,7 +9,9 @@ import { Users } from './dashboard/admin/users/users';
 import { Bitacora } from './dashboard/admin/bitacora/bitacora';
 import { MonitoringComponent } from './dashboard/admin/monitoring/monitoring';
 import { Profile } from './dashboard/profile/profile';
+import { WorkshopManagementComponent } from './dashboard/workshop-management/workshop-management.component';
 import { authGuard, publicGuard, adminGuard } from './core/guards/auth.guard';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -32,7 +34,9 @@ export const routes: Routes = [
         path: 'incidents/management', 
         loadComponent: () => import('./dashboard/incidents/management/management').then(m => m.IncidentManagementComponent) 
       },
+      { path: 'workshop-management', component: WorkshopManagementComponent },
       { path: 'profile', component: Profile }
+
     ]
   },
   { path: '**', redirectTo: '/login' },
