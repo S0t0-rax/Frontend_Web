@@ -44,7 +44,7 @@ export class WorkshopManagementComponent implements OnInit {
     // Por ahora, listamos y filtramos (o usamos el ID si lo tuviéramos en el token)
     this.workshopService.getWorkshops().subscribe({
       next: (workshops) => {
-        const currentUser = this.authService.currentUserValue;
+        const currentUser = this.authService.currentUser();
         const myWs = workshops.find(w => w.owner_id === currentUser?.id);
         if (myWs) {
           this.workshop.set(myWs);
