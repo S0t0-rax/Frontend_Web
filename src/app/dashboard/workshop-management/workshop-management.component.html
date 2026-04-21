@@ -1,7 +1,7 @@
 <div class="workshop-container">
   <div class="header">
-    <h1>🏭 Mi Mecánica</h1>
-    <p>Gestiona la identidad de tu negocio y permite que los clientes te ubiquen en Santa Cruz.</p>
+    <h1>🏭 Gestión Talleres</h1>
+    <p>Administra tus sucursales, añade nuevas ubicaciones y especifica dónde trabajan tus mecánicos.</p>
   </div>
 
   @if (isLoading()) {
@@ -10,81 +10,96 @@
       <p>Consultando registros...</p>
     </div>
   } @else {
-    <form [formGroup]="workshopForm" (ngSubmit)="onSubmit()" class="premium-card">
-      <div class="form-grid">
-        <div class="form-group full-width">
-          <label for="name">Nombre Comercial</label>
-          <input id="name" type="text" formControlName="name" placeholder="Ej: Talleres Santa Cruz">
-          @if (workshopForm.get('name')?.touched && workshopForm.get('name')?.invalid) {
-            <span class="error-text">El nombre es obligatorio.</span>
+    <div class="workshop-grid">
+      <aside class="ws-list">
+        <div class="ws-list-header">
+          <h3>Sucursales</h3>
+          <button (click)="newWorkshop()" class="btn-small">+ Agregar Taller</button>
+        </div>
+        <ul>
+          @for (let w of workshopsOwned()) {
+            <li [class.selected]="workshop() && workshop()!.id === w.id">
+              <div class="ws-info">
+                <strong>{{ w.name }}</strong>
+                <small>{{ w.address_text || '-' }}</small>
+              </div>
+              <div class="ws-actions">
+                <button (click)="selectWorkshop(w)" class="btn-link">Editar</button>
+              </div>
+            </li>
           }
-        </div>
+        </ul>
+      </aside>
 
-        <div class="form-group">
-          <label for="tax_id">Identificación Fiscal (NIT)</label>
-          <input id="tax_id" type="text" formControlName="tax_id" placeholder="Opcional">
-        </div>
-
-        <div class="form-group">
-          <label for="address">Dirección Referencial</label>
-          <input id="address" type="text" formControlName="address_text" placeholder="Calle, Barrio, Zona">
-          @if (workshopForm.get('address_text')?.touched && workshopForm.get('address_text')?.invalid) {
-            <span class="error-text">La dirección es necesaria.</span>
-          }
-        </div>
-
-        <div class="section-divider full-width">
-          <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Selección Geográfica</h3>
-          <p>Haz clic en el mapa exactamente sobre la ubicación de tu taller para capturar las coordenadas.</p>
-        </div>
-
-        <div class="full-width map-wrapper">
-          <div id="map"></div>
-          
-          <!-- Capas de retroalimentación -->
-          @if (mapStatus() === 'loading') {
-            <div class="map-overlay loading">
-              <div class="spinner small"></div>
-              <p>Cargando motor de mapas...</p>
+      <section class="ws-editor">
+        <form [formGroup]="workshopForm" (ngSubmit)="onSubmit()" class="premium-card">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="name">Nombre Comercial</label>
+              <input id="name" type="text" formControlName="name" placeholder="Ej: Talleres Santa Cruz">
+              @if (workshopForm.get('name')?.touched && workshopForm.get('name')?.invalid) {
+                <span class="error-text">El nombre es obligatorio.</span>
+              }
             </div>
-          }
-          
-          @if (mapStatus() === 'error') {
-            <div class="map-overlay error">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p>No se pudo cargar el mapa</p>
-              <span class="error-detail">{{ mapError() }}</span>
-              <button type="button" (click)="retryMap()" class="btn-retry">🔄 Reintentar</button>
+
+            <div class="form-group">
+              <label for="tax_id">Identificación Fiscal (NIT)</label>
+              <input id="tax_id" type="text" formControlName="tax_id" placeholder="Opcional">
             </div>
+
+            <div class="form-group">
+              <label for="address">Dirección Referencial</label>
+              <input id="address" type="text" formControlName="address_text" placeholder="Calle, Barrio, Zona">
+              @if (workshopForm.get('address_text')?.touched && workshopForm.get('address_text')?.invalid) {
+                <span class="error-text">La dirección es necesaria.</span>
+              }
+            </div>
+
+            <div class="section-divider full-width">
+              <h3>Selección Geográfica</h3>
+              <p>Haz clic en el mapa exactamente sobre la ubicación de tu taller para capturar las coordenadas.</p>
+            </div>
+
+            <div class="full-width map-wrapper">
+              <div id="map"></div>
+              @if (mapStatus() === 'loading') {
+                <div class="map-overlay loading">
+                  <div class="spinner small"></div>
+                  <p>Cargando motor de mapas...</p>
+                </div>
+              }
+              @if (mapStatus() === 'error') {
+                <div class="map-overlay error">
+                  <p>No se pudo cargar el mapa</p>
+                  <span class="error-detail">{{ mapError() }}</span>
+                  <button type="button" (click)="retryMap()" class="btn-retry">🔄 Reintentar</button>
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="latitude">Latitud (Auto)</label>
+              <input id="latitude" type="number" formControlName="latitude" readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="longitude">Longitud (Auto)</label>
+              <input id="longitude" type="number" formControlName="longitude" readonly>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn-primary" [disabled]="workshopForm.invalid || isSaving()">
+              {{ isSaving() ? 'PROCESANDO...' : (workshop() ? 'GUARDAR CAMBIOS' : 'REGISTRAR TALLER') }}
+            </button>
+          </div>
+
+          @if (message().text) {
+            <div class="alert" [ngClass]="message().type">{{ message().text }}</div>
           }
-        </div>
-
-        <div class="form-group">
-          <label for="latitude">Latitud (Auto)</label>
-          <input id="latitude" type="number" formControlName="latitude" readonly>
-        </div>
-
-        <div class="form-group">
-          <label for="longitude">Longitud (Auto)</label>
-          <input id="longitude" type="number" formControlName="longitude" readonly>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button type="submit" class="btn-primary" [disabled]="workshopForm.invalid || isSaving()">
-          {{ isSaving() ? 'PROCESANDO...' : (workshop() ? 'GUARDAR CAMBIOS' : 'REGISTRAR TALLER') }}
-        </button>
-      </div>
-
-      @if (message().text) {
-        <div class="alert" [ngClass]="message().type">
-          {{ message().text }}
-        </div>
-      }
-    </form>
+        </form>
+      </section>
+    </div>
   }
-  
-  <!-- Gestión de Personal para Dueños -->
-  <app-gestion-personal></app-gestion-personal>
 
 </div>

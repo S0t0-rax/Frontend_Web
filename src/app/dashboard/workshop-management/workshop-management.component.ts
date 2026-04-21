@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GestionPersonalComponent } from './gestion-personal.component';
+// GestionPersonal is now a separate route/component
 import { WorkshopService } from '../../core/services/workshop.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Workshop } from '../../core/models/workshop.model';
@@ -9,7 +9,7 @@ import { Workshop } from '../../core/models/workshop.model';
 @Component({
   selector: 'app-workshop-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, GestionPersonalComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './workshop-management.component.html',
   styleUrl: './workshop-management.component.css'
 })
@@ -18,6 +18,7 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   
   workshopForm: FormGroup;
   workshop = signal<Workshop | null>(null);
+  workshopsOwned = signal<Workshop[]>([] as Workshop[]);
   isLoading = signal(false);
   isSaving = signal(false);
   message = signal({ text: '', type: '' });
@@ -43,7 +44,7 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadMyWorkshop();
+    this.loadWorkshops();
   }
 
   ngOnDestroy(): void {
@@ -124,6 +125,42 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   // Método público para el botón de reintento en HTML
   retryMap(): void {
     this.initMap();
+  }
+
+  loadWorkshops(): void {
+    this.isLoading.set(true);
+    this.workshopService.getWorkshops().subscribe({
+      next: (workshops) => {
+        const currentUser = this.authService.currentUser();
+        const myWs = workshops.filter(w => w.owner_id === currentUser?.id);
+        this.workshopsOwned.set(myWs);
+
+        // Default: select first workshop if exists
+        if (myWs.length > 0) {
+          this.selectWorkshop(myWs[0]);
+        } else {
+          this.newWorkshop();
+        }
+
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  selectWorkshop(ws: Workshop): void {
+    this.workshop.set(ws);
+    this.workshopForm.patchValue(ws);
+    // Re-init map to show marker for selected workshop
+    setTimeout(() => this.initMap(), 50);
+  }
+
+  newWorkshop(): void {
+    this.workshop.set(null);
+    this.workshopForm.reset({ name: '', tax_id: '', address_text: '', latitude: null, longitude: null });
+    setTimeout(() => this.initMap(), 50);
   }
 
   private setMarkerAt(lat: number, lng: number): void {
