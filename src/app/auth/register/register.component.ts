@@ -121,11 +121,22 @@ export class RegisterComponent {
         if (err.status === 409) {
           this.errorMessage.set('Este correo electrónico ya está registrado.');
         } else if (err.status === 422) {
-          this.errorMessage.set('Datos inválidos. Revisa los campos e intenta nuevamente.');
+          const details = err.error?.detail;
+          if (Array.isArray(details) && details.length > 0) {
+            const firstError = details[0];
+            const field = firstError.loc[firstError.loc.length - 1];
+            if (field === 'email') {
+              this.errorMessage.set('El formato del correo electrónico no es válido.');
+            } else {
+              this.errorMessage.set(`Dato inválido: ${firstError.msg}`);
+            }
+          } else {
+            this.errorMessage.set('Los datos enviados no son válidos.');
+          }
         } else if (err.status === 0) {
           this.errorMessage.set('No se pudo conectar con el servidor. Intenta más tarde.');
         } else {
-          this.errorMessage.set(err.error?.detail ?? 'Error inesperado. Intenta nuevamente.');
+          this.errorMessage.set(err.error?.message ?? 'Error inesperado. Intenta nuevamente.');
         }
       },
     });
