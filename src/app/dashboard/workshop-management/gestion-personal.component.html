@@ -1,0 +1,47 @@
+<div class="staff-card">
+  <h3>Gestión de Personal</h3>
+
+  <div *ngIf="isLoading()" class="loading">Cargando personal...</div>
+
+  <div *ngIf="!isLoading()">
+    <table class="staff-table">
+      <thead>
+        <tr><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Estado</th><th>Taller</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of staff()">
+          <td>{{ s.full_name }}</td>
+          <td>{{ s.email }}</td>
+          <td>{{ s.phone || '-' }}</td>
+          <td>
+            <span [class.busy]="s.is_busy" [class.free]="!s.is_busy">{{ s.is_busy ? 'Ocupado' : 'Disponible' }}</span>
+          </td>
+          <td>{{ s.workshop_name || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="create-section">
+      <h4>Crear Mecánico</h4>
+      <form [formGroup]="createForm" (ngSubmit)="createMechanic()">
+        <div class="row">
+          <input formControlName="full_name" placeholder="Nombre completo">
+          <input formControlName="email" placeholder="Correo">
+        </div>
+        <div class="row">
+          <input formControlName="phone" placeholder="Teléfono (opcional)">
+          <input type="password" formControlName="password" placeholder="Contraseña inicial">
+        </div>
+        <div class="row">
+          <select formControlName="workshop_id">
+            <option [ngValue]="null">Sin asignar</option>
+            <option *ngFor="let w of workshops" [value]="w.id">{{ w.name }}</option>
+          </select>
+        </div>
+        <button type="submit" [disabled]="isCreating()">{{ isCreating() ? 'Creando...' : 'Crear Mecánico' }}</button>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="message().text" class="msg" [ngClass]="message().type">{{ message().text }}</div>
+</div>

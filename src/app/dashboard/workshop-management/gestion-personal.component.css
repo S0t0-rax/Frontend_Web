@@ -1,0 +1,12 @@
+/* Minimal styles for Gestión de Personal */
+.staff-card { margin-top: 24px; padding: 16px; border-radius: 8px; background: var(--card-bg); }
+.staff-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.staff-table th, .staff-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.busy { color: var(--danger); font-weight: 600; }
+.free { color: var(--success); font-weight: 600; }
+.create-section { margin-top: 12px; }
+.create-section .row { display:flex; gap:8px; margin-bottom:8px; }
+.create-section input, .create-section select { flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit }
+.create-section button { padding:8px 12px; border-radius:6px; }
+.msg.success { color: var(--success); }
+.msg.error { color: var(--danger); }

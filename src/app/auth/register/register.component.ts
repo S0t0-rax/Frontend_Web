@@ -29,7 +29,7 @@ export class RegisterComponent {
 
   /** Opciones de rol disponibles en el registro público */
   roleOptions = [
-    { value: 'mechanic', label: 'Mecánico', icon: '🔧' },
+    { value: 'client', label: 'Cliente', icon: '👤' },
     { value: 'workshop_owner', label: 'Dueño de Taller', icon: '🏭' },
   ];
 
@@ -43,7 +43,7 @@ export class RegisterComponent {
         full_name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
         email: ['', [Validators.required, Validators.email]],
         phone: ['', [Validators.maxLength(20)]],
-        role: ['mechanic', [Validators.required]],
+        role: ['client', [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
       },

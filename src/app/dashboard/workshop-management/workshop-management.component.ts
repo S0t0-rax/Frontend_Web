@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { GestionPersonalComponent } from './gestion-personal.component';
 import { WorkshopService } from '../../core/services/workshop.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Workshop } from '../../core/models/workshop.model';
@@ -8,7 +9,7 @@ import { Workshop } from '../../core/models/workshop.model';
 @Component({
   selector: 'app-workshop-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, GestionPersonalComponent],
   templateUrl: './workshop-management.component.html',
   styleUrl: './workshop-management.component.css'
 })
