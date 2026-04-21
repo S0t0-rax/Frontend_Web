@@ -1,0 +1,75 @@
+<div class="monitoring-container">
+  <header class="header">
+    <div class="title-section">
+      <h1>Monitoreo Global de Incidentes</h1>
+      <p class="subtitle">Estado en tiempo real de todas las solicitudes de asistencia.</p>
+    </div>
+    <button (click)="loadIncidents()" class="btn-refresh" [disabled]="isLoading()">
+      <svg [class.spinning]="isLoading()" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+      Sincronizar
+    </button>
+  </header>
+
+  <div class="stats-summary" *ngIf="!isLoading()">
+    <div class="stat-box">
+      <span class="stat-value">{{ incidents().length }}</span>
+      <span class="stat-label">Total Incidentes</span>
+    </div>
+    <div class="stat-box active">
+      <span class="stat-value">{{ activeCount() }}</span>
+      <span class="stat-label">En Atención</span>
+    </div>
+  </div>
+
+  <div class="table-container card">
+    <table class="monitoring-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Vehículo/Ref</th>
+          <th>Estado</th>
+          <th>Mecánico Asignado</th>
+          <th>Taller</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let incident of incidents()" [class.row-active]="incident.status === 'in_progress'">
+          <td class="id-cell">#{{ incident.id }}</td>
+          <td class="bold">{{ incident.client_name }}</td>
+          <td>
+            <div class="ref-cell">
+              <span class="address">{{ incident.address_reference || 'Sin dirección' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [attr.data-status]="incident.status">
+              {{ getStatusLabel(incident.status) }}
+            </span>
+          </td>
+          <td>
+            <div class="mechanic-cell" *ngIf="incident.mechanic_name; else unassigned">
+              <span class="mechanic-icon">🔧</span>
+              <span class="mechanic-name">{{ incident.mechanic_name }}</span>
+            </div>
+            <ng-template #unassigned>
+              <span class="unassigned-text">Esperando mecánico...</span>
+            </ng-template>
+          </td>
+          <td>{{ incident.workshop_name || '-' }}</td>
+          <td class="date-cell">{{ incident.reported_at | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="isLoading()" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Cargando información del sistema...</p>
+    </div>
+
+    <div *ngIf="!isLoading() && incidents().length === 0" class="empty-state">
+      <p>No se encontraron incidentes registrados en el sistema.</p>
+    </div>
+  </div>
+</div>

@@ -83,7 +83,7 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
 })
 export class IncidentManagementComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
-  
+
   activeIncidents = signal<Incident[]>([]);
   loading = signal(false);
 
@@ -95,7 +95,7 @@ export class IncidentManagementComponent implements OnInit {
     this.loading.set(true);
     // Para propósitos de este MVP/Dashboard, buscamos todos los incidentes 
     // y filtramos localmente aquellos que están en estados de gestión.
-    this.incidentService.getNearbyIncidents(-16.5, -68.15, 100000) 
+    this.incidentService.getNearbyIncidents(-16.5, -68.15, 100000)
       .subscribe({
         next: (data) => {
           const managed = data.filter(i => i.status === 'accepted' || i.status === 'in_progress');

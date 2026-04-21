@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserResponse } from '../models/auth.model';
-import { UserAdminUpdate, AuditLogResponse } from '../models/admin.model';
+import { UserAdminUpdate, AuditLogResponse, IncidentGlobalResponse } from '../models/admin.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,5 +29,9 @@ export class AdminService {
   // --- Audit Log ---
   getAuditLogs(): Observable<AuditLogResponse[]> {
     return this.http.get<AuditLogResponse[]>(`${this.apiUrl}/api/v1/audit`);
+  }
+
+  getGlobalIncidents(): Observable<IncidentGlobalResponse[]> {
+    return this.http.get<IncidentGlobalResponse[]>(`${this.apiUrl}/api/v1/incidents/global`);
   }
 }

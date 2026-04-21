@@ -15,3 +15,18 @@ export interface AuditLogResponse {
   created_at: string;
   ip_address: string | null;
 }
+
+export interface IncidentGlobalResponse {
+  id: number;
+  client_id: number;
+  car_id: number;
+  address_reference: string;
+  description: string;
+  severity_level: string;
+  status: string;
+  reported_at: string;
+  client_name: string;
+  mechanic_name: string | null;
+  workshop_name: string | null;
+}
+

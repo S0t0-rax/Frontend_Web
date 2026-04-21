@@ -7,6 +7,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { Home } from './dashboard/home/home';
 import { Users } from './dashboard/admin/users/users';
 import { Bitacora } from './dashboard/admin/bitacora/bitacora';
+import { MonitoringComponent } from './dashboard/admin/monitoring/monitoring';
 import { Profile } from './dashboard/profile/profile';
 import { authGuard, publicGuard, adminGuard } from './core/guards/auth.guard';
 
@@ -21,6 +22,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: Home },
       { path: 'admin/users', component: Users, canActivate: [adminGuard] },
+      { path: 'admin/monitoring', component: MonitoringComponent, canActivate: [adminGuard] },
       { path: 'admin/bitacora', component: Bitacora, canActivate: [adminGuard] },
       { 
         path: 'incidents/available', 
