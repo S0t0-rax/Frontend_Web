@@ -17,7 +17,7 @@
           <button (click)="newWorkshop()" class="btn-small">+ Agregar Taller</button>
         </div>
         <ul>
-          @for (w of workshopsOwned; track w.id) {
+          @for (w of workshopsOwned(); track w.id) {
             <li [class.selected]="workshop() && workshop()!.id === w.id">
               <div class="ws-info">
                 <strong>{{ w.name }}</strong>
