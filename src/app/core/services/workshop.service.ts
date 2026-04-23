@@ -21,7 +21,7 @@ export class WorkshopService {
 
   /** Obtiene detalle de un taller */
   getWorkshop(id: number): Observable<Workshop> {
-    return this.http.get<Workshop>(`${this.apiUrl}/${id}`);
+    return this.http.get<Workshop>(`${this.apiUrl}${id}`);
   }
 
   /** Crea un taller */
@@ -31,12 +31,12 @@ export class WorkshopService {
 
   /** Actualiza un taller */
   updateWorkshop(id: number, workshop: WorkshopUpdate): Observable<Workshop> {
-    return this.http.patch<Workshop>(`${this.apiUrl}/${id}`, workshop);
+    return this.http.patch<Workshop>(`${this.apiUrl}${id}`, workshop);
   }
 
   /** Busca talleres cercanos */
   getNearbyWorkshops(lat: number, lng: number, radius = 10000): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/nearby`, {
+    return this.http.get<any[]>(`${this.apiUrl}nearby`, {
       params: {
         latitude: lat.toString(),
         longitude: lng.toString(),

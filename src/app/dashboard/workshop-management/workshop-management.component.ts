@@ -75,6 +75,8 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
 
         if (this.map) {
           this.map.remove();
+          // limpiar referencia al marcador cuando removemos el mapa
+          this.marker = undefined;
         }
 
         this.map = this.L.map('map', {
@@ -146,6 +148,8 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoading.set(false);
+        // Inicializar mapa aunque falle la carga de datos para permitir agregar nuevo
+        setTimeout(() => this.initMap(), 50);
       }
     });
   }
@@ -160,6 +164,8 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   newWorkshop(): void {
     this.workshop.set(null);
     this.workshopForm.reset({ name: '', tax_id: '', address_text: '', latitude: null, longitude: null });
+    // Asegurar que cualquier marcador previo sea descartado antes de re-inicializar
+    this.marker = undefined;
     setTimeout(() => this.initMap(), 50);
   }
 
