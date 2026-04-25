@@ -29,6 +29,7 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
             <option value="10000">10 km</option>
             <option value="20000">20 km</option>
             <option value="50000">50 km</option>
+            <option value="0">Cualquiera</option>
           </select>
         </div>
       </div>
