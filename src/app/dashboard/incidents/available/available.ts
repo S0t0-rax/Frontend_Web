@@ -139,7 +139,7 @@ export class AvailableIncidentsComponent implements OnInit {
   acceptIncident(id: number) {
     if (!confirm('¿Estás seguro de que quieres aceptar esta solicitud de asistencia?')) return;
 
-    this.incidentService.updateIncident(id, { status: 'accepted' })
+    this.incidentService.updateIncident(id, { status: 'assigned' })
       .subscribe({
         next: () => {
           alert('Solicitud aceptada. Ahora puedes gestionarla en "Mis Asistencias".');
