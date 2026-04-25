@@ -31,10 +31,10 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
       <div class="incidents-grid" *ngIf="!loading() && activeIncidents().length > 0">
         <app-incident-card *ngFor="let incident of activeIncidents()" [incident]="incident">
           <div class="management-actions">
-            <button *ngIf="incident.status === 'accepted'" class="btn-action start" (click)="updateStatus(incident.id, 'in_progress')">
+            <button *ngIf="incident.status === 'assigned'" class="btn-action start" (click)="updateStatus(incident.id, 'in_progress')">
               Iniciar Reparación
             </button>
-            <button *ngIf="incident.status === 'in_progress'" class="btn-action done" (click)="updateStatus(incident.id, 'completed')">
+            <button *ngIf="incident.status === 'in_progress'" class="btn-action done" (click)="updateStatus(incident.id, 'resolved')">
               Finalizar Trabajo
             </button>
             <button class="btn-action cancel" (click)="updateStatus(incident.id, 'rejected')">
@@ -98,7 +98,7 @@ export class IncidentManagementComponent implements OnInit {
     this.incidentService.getNearbyIncidents(-16.5, -68.15, 100000)
       .subscribe({
         next: (data) => {
-          const managed = data.filter(i => i.status === 'accepted' || i.status === 'in_progress');
+          const managed = data.filter(i => i.status === 'assigned' || i.status === 'in_progress');
           this.activeIncidents.set(managed);
           this.loading.set(false);
         },
@@ -107,7 +107,7 @@ export class IncidentManagementComponent implements OnInit {
   }
 
   updateStatus(id: number, status: IncidentStatus) {
-    const msg = status === 'completed' ? '¿Confirmas que el trabajo ha sido finalizado?' : '¿Confirmas el cambio de estado?';
+    const msg = status === 'resolved' ? '¿Confirmas que el trabajo ha sido finalizado?' : '¿Confirmas el cambio de estado?';
     if (!confirm(msg)) return;
 
     this.incidentService.updateIncident(id, { status })

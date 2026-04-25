@@ -56,9 +56,9 @@ import { Incident } from '../../../core/models/incident.model';
       text-transform: uppercase;
     }
     .badge.open { background: #3b82f6; color: white; }
-    .badge.accepted { background: #8b5cf6; color: white; }
+    .badge.assigned { background: #8b5cf6; color: white; }
     .badge.in_progress { background: #f59e0b; color: white; }
-    .badge.completed { background: #10b981; color: white; }
+    .badge.resolved { background: #10b981; color: white; }
     
     .date { font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); }
     .car-info { margin: 0; font-size: 1.1rem; color: var(--accent); }

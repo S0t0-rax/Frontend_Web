@@ -1,4 +1,4 @@
-export type IncidentStatus = 'open' | 'accepted' | 'in_progress' | 'completed' | 'rejected' | 'canceled';
+export type IncidentStatus = 'open' | 'assigned' | 'resolved' | 'cancelled' | 'in_progress' | 'rejected';
 export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
 
 export interface IncidentPhoto {

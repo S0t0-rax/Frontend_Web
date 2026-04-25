@@ -15,7 +15,7 @@ export class MonitoringComponent implements OnInit {
   isLoading = signal(true);
 
   activeCount = computed(() => {
-    return this.incidents().filter(i => i.status === 'accepted' || i.status === 'in_progress').length;
+    return this.incidents().filter(i => i.status === 'assigned' || i.status === 'in_progress').length;
   });
 
 
@@ -42,11 +42,11 @@ export class MonitoringComponent implements OnInit {
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
       'open': 'Abierto',
-      'accepted': 'Aceptado',
+      'assigned': 'Asignado',
       'in_progress': 'En Progreso',
-      'completed': 'Completado',
+      'resolved': 'Resuelto',
       'rejected': 'Rechazado',
-      'canceled': 'Cancelado'
+      'cancelled': 'Cancelado'
     };
     return labels[status] || status;
   }
