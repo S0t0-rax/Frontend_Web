@@ -124,7 +124,10 @@ export class AvailableIncidentsComponent implements OnInit {
           this.incidents.set(data);
           this.loading.set(false);
         },
-        error: () => this.loading.set(false)
+        error: (err) => {
+          console.error('Error cargando incidentes:', err);
+          this.loading.set(false);
+        }
       });
   }
 
