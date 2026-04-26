@@ -143,13 +143,21 @@ export class TasksComponent implements OnInit {
     if (!soId) return;
 
     this.incidentService.updateServiceOrder(soId, { arrival_status: status }).subscribe({
-      next: () => this.loadTasks()
+      next: () => this.loadTasks(),
+      error: (err) => {
+        console.error('Error al actualizar estado de llegada:', err);
+        alert('No se pudo actualizar el estado de llegada. Por favor, intenta de nuevo.');
+      }
     });
   }
 
   updateIncidentStatus(id: number, status: IncidentStatus) {
     this.incidentService.updateIncident(id, { status }).subscribe({
-      next: () => this.loadTasks()
+      next: () => this.loadTasks(),
+      error: (err) => {
+        console.error('Error al actualizar estado del incidente:', err);
+        alert('Hubo un error al procesar la solicitud. Por favor, intenta de nuevo.');
+      }
     });
   }
 }
