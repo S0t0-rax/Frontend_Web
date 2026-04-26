@@ -24,5 +24,5 @@ export interface WorkshopUpdate {
   address_text?: string;
   latitude?: number;
   longitude?: number;
-  is_available?: bool;
+  is_available?: boolean;
 }

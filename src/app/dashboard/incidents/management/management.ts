@@ -151,7 +151,7 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
     .modal-header {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
     }
-    .close-btn { background: none; border: none; color: white; fontSize: 24px; cursor: pointer; }
+    .close-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
 
     /* Timeline Styles */
     .status-timeline { margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px; }
