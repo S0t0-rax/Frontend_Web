@@ -6,6 +6,7 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
 import { WorkshopService } from '../../../core/services/workshop.service';
 import { Workshop } from '../../../core/models/workshop.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserService, MechanicStaff } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-available-incidents',
@@ -57,7 +58,7 @@ import { AuthService } from '../../../core/services/auth.service';
             </span>
             <span class="distance-value">{{ (item.minDistance).toFixed(1) }} km de distancia</span>
           </div>
-          <button class="btn-primary full-width" (click)="askConfirmation(item.incident)">
+          <button class="btn-primary full-width" (click)="askConfirmation(item.incident, item.nearestWorkshop)">
             Aceptar Solicitud
           </button>
         </app-incident-card>
@@ -67,11 +68,27 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="modal-overlay" *ngIf="isConfirming()">
         <div class="modal-content">
           <div class="modal-icon">🚨</div>
-          <h3>¿Aceptar Asistencia?</h3>
-          <p>Al aceptar esta solicitud, se te asignará como el responsable de la atención y el cliente será notificado.</p>
+          <h3>Asignar Personal</h3>
+          <p>Selecciona los mecánicos que atenderán este incidente:</p>
+          
+          <div class="mechanic-selector">
+            <div *ngIf="availableMechanics().length === 0" class="no-mechanics">
+              No hay mecánicos disponibles en este momento.
+            </div>
+            <div class="mechanic-item" *ngFor="let mech of availableMechanics()">
+              <label class="checkbox-container">
+                <input type="checkbox" (change)="toggleMechanic(mech.id)" [checked]="selectedMechanicIds().includes(mech.id)">
+                <span class="checkmark"></span>
+                <span class="mech-name">{{ mech.full_name }}</span>
+              </label>
+            </div>
+          </div>
+
           <div class="modal-actions">
             <button class="btn-secondary" (click)="cancelConfirmation()">Cancelar</button>
-            <button class="btn-confirm" (click)="confirmAccept()">Confirmar y Aceptar</button>
+            <button class="btn-confirm" (click)="confirmAccept()" [disabled]="selectedMechanicIds().length === 0">
+              Confirmar y Aceptar
+            </button>
           </div>
         </div>
       </div>
@@ -132,10 +149,31 @@ import { AuthService } from '../../../core/services/auth.service';
       flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.05); color: white;
       border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; cursor: pointer;
     }
-    .btn-confirm {
-      flex: 1; padding: 12px; background: #3b82f6; color: white;
-      border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+    .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .mechanic-selector {
+      margin: 20px 0; max-height: 200px; overflow-y: auto;
+      text-align: left; padding: 10px; background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);
     }
+    .mechanic-item { padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .mechanic-item:last-child { border-bottom: none; }
+    .no-mechanics { color: #ef4444; font-size: 0.85rem; padding: 10px; text-align: center; }
+
+    .checkbox-container {
+      display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;
+    }
+    .checkbox-container input { display: none; }
+    .checkmark {
+      width: 20px; height: 20px; border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px; display: inline-block; position: relative;
+    }
+    .checkbox-container input:checked + .checkmark { background: #3b82f6; border-color: #3b82f6; }
+    .checkbox-container input:checked + .checkmark:after {
+      content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px;
+      border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+    }
+    .mech-name { color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; }
 
     .loader, .empty-state {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -154,13 +192,19 @@ export class AvailableIncidentsComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
   private readonly workshopService = inject(WorkshopService);
   private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
   
   allIncidents = signal<Incident[]>([]);
   myWorkshops = signal<Workshop[]>([]);
   filteredIncidents = signal<any[]>([]);
   loading = signal(false);
   isConfirming = signal(false);
+  
   selectedIncident = signal<Incident | null>(null);
+  selectedWorkshop = signal<Workshop | null>(null);
+  availableMechanics = signal<any[]>([]);
+  selectedMechanicIds = signal<number[]>([]);
+  
   currentRadius = 5000;
 
   ngOnInit() {
@@ -245,27 +289,62 @@ export class AvailableIncidentsComponent implements OnInit {
     this.processAndFilter();
   }
 
-  askConfirmation(incident: Incident) {
+  askConfirmation(incident: Incident, workshop: Workshop) {
     this.selectedIncident.set(incident);
-    this.isConfirming.set(true);
+    this.selectedWorkshop.set(workshop);
+    this.selectedMechanicIds.set([]);
+    
+    // Cargar mecánicos disponibles
+    this.loading.set(true);
+    this.userService.getMyStaff().subscribe({
+      next: (staff) => {
+        // Filtramos por estado "available" o por el campo is_busy legado
+        const available = staff.filter(m => (m as any).status === 'available' || !(m as any).is_busy);
+        this.availableMechanics.set(available);
+        this.isConfirming.set(true);
+        this.loading.set(false);
+      },
+      error: () => {
+        alert('Error al cargar personal disponible.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  toggleMechanic(id: number) {
+    const ids = this.selectedMechanicIds();
+    if (ids.includes(id)) {
+      this.selectedMechanicIds.set(ids.filter(i => i !== id));
+    } else {
+      this.selectedMechanicIds.set([...ids, id]);
+    }
   }
 
   cancelConfirmation() {
     this.isConfirming.set(false);
     this.selectedIncident.set(null);
+    this.selectedWorkshop.set(null);
   }
 
   confirmAccept() {
     const incident = this.selectedIncident();
-    if (!incident) return;
+    const workshop = this.selectedWorkshop();
+    const mechanicIds = this.selectedMechanicIds();
+    
+    if (!incident || !workshop || mechanicIds.length === 0) return;
 
     this.isConfirming.set(false);
     this.loading.set(true);
 
-    this.incidentService.updateIncident(incident.id, { status: 'assigned' })
+    this.incidentService.updateIncident(incident.id, { 
+      status: 'assigned',
+      mechanic_ids: mechanicIds,
+      workshop_id: workshop.id
+    })
       .subscribe({
         next: () => {
           this.selectedIncident.set(null);
+          this.selectedWorkshop.set(null);
           this.loadIncidents();
         },
         error: (err: any) => {

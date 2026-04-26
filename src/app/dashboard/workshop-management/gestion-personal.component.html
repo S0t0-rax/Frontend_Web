@@ -13,7 +13,10 @@
           <div class="si-title">{{ s.full_name || 'Sin nombre' }} <span class="email">{{ s.email }}</span></div>
           <div class="si-meta">
             <span class="phone">{{ s.phone || '-' }}</span>
-            <span class="status" [class.busy]="s.is_busy" [class.free]="!s.is_busy">{{ s.is_busy ? 'Ocupado' : 'Disponible' }}</span>
+            <span class="status" [class.busy]="s.status === 'busy'" [class.free]="s.status === 'available'">
+              {{ s.status === 'busy' ? 'Ocupado' : 'Disponible' }}
+            </span>
+            <span *ngIf="s.status === 'busy'" class="task-badge">Ticket #{{ s.current_incident_id }}</span>
           </div>
         </div>
         <div class="si-right">

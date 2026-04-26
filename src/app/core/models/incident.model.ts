@@ -29,4 +29,6 @@ export interface IncidentUpdate {
   severity_level?: SeverityLevel;
   status?: IncidentStatus;
   address_reference?: string;
+  mechanic_ids?: number[];
+  workshop_id?: number;
 }
