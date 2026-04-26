@@ -13,10 +13,12 @@
           <div class="si-title">{{ s.full_name || 'Sin nombre' }} <span class="email">{{ s.email }}</span></div>
           <div class="si-meta">
             <span class="phone">{{ s.phone || '-' }}</span>
-            <span class="status" [class.busy]="s.status === 'busy'" [class.free]="s.status === 'available'">
-              {{ s.status === 'busy' ? 'Ocupado' : 'Disponible' }}
+            <span class="status" [class.busy]="s.active_tasks_count > 0" [class.free]="s.active_tasks_count === 0">
+              {{ s.active_tasks_count > 0 ? 'Ocupado (' + s.active_tasks_count + ')' : 'Disponible' }}
             </span>
-            <span *ngIf="s.status === 'busy'" class="task-badge">Ticket #{{ s.current_incident_id }}</span>
+            <div *ngIf="s.active_incident_ids && s.active_incident_ids.length > 0" class="task-list">
+              <span *ngFor="let id of s.active_incident_ids" class="task-badge">Ticket #{{ id }}</span>
+            </div>
           </div>
         </div>
         <div class="si-right">
