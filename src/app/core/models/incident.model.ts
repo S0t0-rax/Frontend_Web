@@ -22,6 +22,13 @@ export interface Incident {
   latitude: number;
   longitude: number;
   photos: IncidentPhoto[];
+  // Info extendida (Staff)
+  workshop_name?: string;
+  mechanic_name?: string;
+  arrival_status?: string;
+  scheduled_at?: string;
+  started_at?: string;
+  finished_at?: string;
 }
 
 export interface IncidentUpdate {

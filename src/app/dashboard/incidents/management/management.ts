@@ -31,6 +31,9 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
       <div class="incidents-grid" *ngIf="!loading() && activeIncidents().length > 0">
         <app-incident-card *ngFor="let incident of activeIncidents()" [incident]="incident">
           <div class="management-actions">
+            <button class="btn-action view" (click)="selectedIncident.set(incident)">
+              Ver Estado
+            </button>
             <button *ngIf="incident.status === 'assigned'" class="btn-action start" (click)="updateStatus(incident.id, 'in_progress')">
               Iniciar Reparación
             </button>
@@ -42,6 +45,63 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
             </button>
           </div>
         </app-incident-card>
+      </div>
+
+      <!-- Modal de Estado Detallado -->
+      <div class="modal-overlay" *ngIf="selectedIncident()" (click)="selectedIncident.set(null)">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <header class="modal-header">
+            <h3>Estado Detallado - Ticket #{{ selectedIncident()?.id }}</h3>
+            <button class="close-btn" (click)="selectedIncident.set(null)">&times;</button>
+          </header>
+          
+          <div class="modal-body" *ngIf="selectedIncident() as inc">
+            <div class="status-timeline">
+              <div class="timeline-item" [class.active]="inc.reported_at">
+                <span class="dot"></span>
+                <div class="info">
+                  <strong>Reportado</strong>
+                  <span>{{ inc.reported_at | date:'medium' }}</span>
+                </div>
+              </div>
+              
+              <div class="timeline-item" [class.active]="inc.scheduled_at">
+                <span class="dot"></span>
+                <div class="info">
+                  <strong>Salida del Taller</strong>
+                  <span>{{ inc.scheduled_at ? (inc.scheduled_at | date:'medium') : 'Pendiente' }}</span>
+                </div>
+              </div>
+              
+              <div class="timeline-item" [class.active]="inc.started_at">
+                <span class="dot"></span>
+                <div class="info">
+                  <strong>Llegada al Incidente</strong>
+                  <span>{{ inc.started_at ? (inc.started_at | date:'medium') : 'Pendiente' }}</span>
+                </div>
+              </div>
+              
+              <div class="timeline-item" [class.active]="inc.finished_at">
+                <span class="dot"></span>
+                <div class="info">
+                  <strong>Reparación Finalizada</strong>
+                  <span>{{ inc.finished_at ? (inc.finished_at | date:'medium') : 'Pendiente' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="extra-info">
+              <div class="info-group">
+                <label>Mecánico Asignado</label>
+                <p>{{ inc.mechanic_name || 'No asignado' }}</p>
+              </div>
+              <div class="info-group">
+                <label>Estado del Viaje</label>
+                <p class="status-pill" [ngClass]="inc.arrival_status">{{ inc.arrival_status || 'pending' | uppercase }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -77,6 +137,40 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
       border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-content {
+      background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; width: 90%; max-width: 500px; padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+    }
+    .close-btn { background: none; border: none; color: white; fontSize: 24px; cursor: pointer; }
+
+    /* Timeline Styles */
+    .status-timeline { margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .timeline-item { display: flex; gap: 16px; align-items: flex-start; opacity: 0.4; }
+    .timeline-item.active { opacity: 1; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: #64748b; margin-top: 6px; position: relative; }
+    .timeline-item.active .dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    .info { display: flex; flex-direction: column; }
+    .info strong { font-size: 0.9rem; }
+    .info span { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+
+    .extra-info { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .info-group label { font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+    .status-pill { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.1); margin-top: 4px; }
+    .on_the_way { color: #3b82f6; }
+    .arrived { color: #10b981; }
+
+    .btn-action.view { background: rgba(255,255,255,0.1); color: white; margin-bottom: 8px; }
+
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   `]
@@ -85,6 +179,7 @@ export class IncidentManagementComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
 
   activeIncidents = signal<Incident[]>([]);
+  selectedIncident = signal<Incident | null>(null);
   loading = signal(false);
 
   ngOnInit() {
