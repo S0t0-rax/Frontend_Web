@@ -1,5 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IncidentService } from '../../../core/services/incident.service';
+import { Incident } from '../../../core/models/incident.model';
 import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card';
 import { WorkshopService } from '../../../core/services/workshop.service';
 import { Workshop } from '../../../core/models/workshop.model';
@@ -187,7 +189,7 @@ export class AvailableIncidentsComponent implements OnInit {
           this.processAndFilter();
           this.loading.set(false);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error cargando incidentes:', err);
           this.loading.set(false);
         }
@@ -266,7 +268,7 @@ export class AvailableIncidentsComponent implements OnInit {
           this.selectedIncident.set(null);
           this.loadIncidents();
         },
-        error: (err) => {
+        error: (err: any) => {
           alert('Error al aceptar solicitud: ' + (err.error?.detail || 'Error desconocido'));
           this.loading.set(false);
         }
