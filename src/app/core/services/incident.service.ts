@@ -49,4 +49,18 @@ export class IncidentService {
   getAssignedIncidents(): Observable<Incident[]> {
     return this.http.get<Incident[]>(`${this.apiUrl}/assigned`);
   }
+
+  /**
+   * Obtener incidentes asignados al mecánico actual
+   */
+  getMechanicTasks(): Observable<Incident[]> {
+    return this.http.get<Incident[]>(`${this.apiUrl}/mechanic/tasks`);
+  }
+
+  /**
+   * Actualizar estado de llegada de una orden de servicio
+   */
+  updateServiceOrder(orderId: number, data: any): Observable<any> {
+    return this.http.patch<any>(`${environment.apiUrl}/api/v1/service-orders/${orderId}`, data);
+  }
 }

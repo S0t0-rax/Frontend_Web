@@ -37,6 +37,10 @@ export const routes: Routes = [
       },
       { path: 'workshop-management', component: WorkshopManagementComponent },
       { path: 'workshop-management/personal', component: GestionPersonalComponent },
+      { 
+        path: 'mechanic/tasks', 
+        loadComponent: () => import('./dashboard/mechanic/tasks/tasks.component').then(m => m.TasksComponent) 
+      },
       { path: 'profile', component: Profile }
 
     ]
