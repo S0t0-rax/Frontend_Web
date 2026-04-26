@@ -18,7 +18,8 @@ export interface Incident {
   description?: string;
   severity_level: SeverityLevel;
   status: IncidentStatus;
-  reported_at: string;
+  latitude: number;
+  longitude: number;
   photos: IncidentPhoto[];
 }
 
