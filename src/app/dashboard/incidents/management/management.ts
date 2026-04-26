@@ -93,13 +93,10 @@ export class IncidentManagementComponent implements OnInit {
 
   loadMyIncidents() {
     this.loading.set(true);
-    // Para propósitos de este MVP/Dashboard, buscamos todos los incidentes 
-    // y filtramos localmente aquellos que están en estados de gestión.
-    this.incidentService.getNearbyIncidents(-16.5, -68.15, 100000)
+    this.incidentService.getAssignedIncidents()
       .subscribe({
         next: (data) => {
-          const managed = data.filter(i => i.status === 'assigned' || i.status === 'in_progress');
-          this.activeIncidents.set(managed);
+          this.activeIncidents.set(data);
           this.loading.set(false);
         },
         error: () => this.loading.set(false)

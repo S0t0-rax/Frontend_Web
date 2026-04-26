@@ -43,11 +43,10 @@ export class IncidentService {
    * NOTA: Actualmente el endpoint de "/" lista solo los del cliente authenticado en el backend v1.
    * Usaremos Nearby o lista global si existe.
    */
-  getIncidentsByStatus(status: IncidentStatus): Observable<Incident[]> {
-    // Como el backend actual no tiene un filtro directo por estado global para staff,
-    // usaremos un radio grande en nearby como fallback temporal o llamaremos al "/" 
-    // sabiendo que staff podría necesitar otro endpoint. 
-    // Por ahora implementamos Nearby.
-    return this.getNearbyIncidents(-16.5, -68.15, 50000); // Radio La Paz aprox
+  /**
+   * Obtener incidentes asignados a los talleres del dueño actual
+   */
+  getAssignedIncidents(): Observable<Incident[]> {
+    return this.http.get<Incident[]>(`${this.apiUrl}/assigned`);
   }
 }
