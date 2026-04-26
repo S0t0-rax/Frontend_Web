@@ -39,7 +39,8 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
       tax_id: [''],
       address_text: ['', [Validators.required, Validators.minLength(5)]],
       latitude: [null, [Validators.required]],
-      longitude: [null, [Validators.required]]
+      longitude: [null, [Validators.required]],
+      is_available: [true]
     });
   }
 
@@ -163,7 +164,14 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
 
   newWorkshop(): void {
     this.workshop.set(null);
-    this.workshopForm.reset({ name: '', tax_id: '', address_text: '', latitude: null, longitude: null });
+    this.workshopForm.reset({ 
+      name: '', 
+      tax_id: '', 
+      address_text: '', 
+      latitude: null, 
+      longitude: null,
+      is_available: true
+    });
     // Asegurar que cualquier marcador previo sea descartado antes de re-inicializar
     this.marker = undefined;
     setTimeout(() => this.initMap(), 50);

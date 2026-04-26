@@ -7,6 +7,7 @@ export interface Workshop {
   latitude: number;
   longitude: number;
   rating?: number;
+  is_available: boolean;
 }
 
 export interface WorkshopCreate {
@@ -15,6 +16,7 @@ export interface WorkshopCreate {
   address_text: string;
   latitude: number;
   longitude: number;
+  is_available?: boolean;
 }
 
 export interface WorkshopUpdate {
@@ -22,4 +24,5 @@ export interface WorkshopUpdate {
   address_text?: string;
   latitude?: number;
   longitude?: number;
+  is_available?: bool;
 }
