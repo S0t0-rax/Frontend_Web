@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IncidentService } from '../../../core/services/incident.service';
-import { Incident } from '../../../core/models/incident.model';
 import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card';
+import { WorkshopService } from '../../../core/services/workshop.service';
+import { Workshop } from '../../../core/models/workshop.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-available-incidents',
@@ -45,12 +46,32 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
         <p>Vuelve a intentarlo en unos minutos o aumenta el radio de búsqueda.</p>
       </div>
 
-      <div class="incidents-grid" *ngIf="!loading() && incidents().length > 0">
-        <app-incident-card *ngFor="let incident of incidents()" [incident]="incident">
-          <button class="btn-primary full-width" (click)="acceptIncident(incident.id)">
+      <div class="incidents-grid" *ngIf="!loading() && filteredIncidents().length > 0">
+        <app-incident-card *ngFor="let item of filteredIncidents()" [incident]="item.incident">
+          <div class="nearest-info">
+            <span class="workshop-name">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Taller: {{ item.nearestWorkshop.name }}
+            </span>
+            <span class="distance-value">{{ (item.minDistance).toFixed(1) }} km de distancia</span>
+          </div>
+          <button class="btn-primary full-width" (click)="askConfirmation(item.incident)">
             Aceptar Solicitud
           </button>
         </app-incident-card>
+      </div>
+
+      <!-- Modal de Confirmación Personalizado -->
+      <div class="modal-overlay" *ngIf="isConfirming()">
+        <div class="modal-content">
+          <div class="modal-icon">🚨</div>
+          <h3>¿Aceptar Asistencia?</h3>
+          <p>Al aceptar esta solicitud, se te asignará como el responsable de la atención y el cliente será notificado.</p>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="cancelConfirmation()">Cancelar</button>
+            <button class="btn-confirm" (click)="confirmAccept()">Confirmar y Aceptar</button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -74,19 +95,45 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
       padding: 4px 8px; border-radius: 4px;
     }
 
-    .incidents-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
+    .nearest-info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      padding: 8px 12px; border-radius: 8px; margin-bottom: 12px;
+      display: flex; flex-direction: column; gap: 4px;
     }
+    .workshop-name { color: #60a5fa; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .distance-value { color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; }
 
     .btn-primary {
-      background: var(--accent); color: #000; border: none;
-      padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;
-      transition: opacity 0.2s;
+      background: #3b82f6; color: #fff; border: none;
+      padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
-    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
     .full-width { width: 100%; }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+      background: #1a1a1a; border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 32px; border-radius: 20px; max-width: 400px; width: 90%;
+      text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .modal-icon { font-size: 40px; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .btn-secondary {
+      flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.05); color: white;
+      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; cursor: pointer;
+    }
+    .btn-confirm {
+      flex: 1; padding: 12px; background: #3b82f6; color: white;
+      border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+    }
 
     .loader, .empty-state {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -103,25 +150,41 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
 })
 export class AvailableIncidentsComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
+  private readonly workshopService = inject(WorkshopService);
+  private readonly authService = inject(AuthService);
   
-  incidents = signal<Incident[]>([]);
+  allIncidents = signal<Incident[]>([]);
+  myWorkshops = signal<Workshop[]>([]);
+  filteredIncidents = signal<any[]>([]);
   loading = signal(false);
+  isConfirming = signal(false);
+  selectedIncident = signal<Incident | null>(null);
   currentRadius = 5000;
 
   ngOnInit() {
-    this.loadIncidents();
+    this.loadWorkshopsAndIncidents();
+  }
+
+  loadWorkshopsAndIncidents() {
+    this.loading.set(true);
+    // 1. Cargar talleres del dueño
+    this.workshopService.getWorkshops().subscribe(workshops => {
+      const myWs = workshops.filter(w => w.owner_id === this.authService.currentUser()?.id);
+      this.myWorkshops.set(myWs);
+      
+      // 2. Cargar todos los incidentes abiertos (radius=0)
+      this.loadIncidents();
+    });
   }
 
   loadIncidents() {
     this.loading.set(true);
-    // Coordenadas base (ej. Centro de La Paz) mientras implementamos geolocalización real
-    const lat = -16.5000;
-    const lng = -68.1500;
-
-    this.incidentService.getNearbyIncidents(lat, lng, this.currentRadius)
+    // Usamos coordenadas por defecto pero con radio 0 para traer todos los abiertos
+    this.incidentService.getNearbyIncidents(0, 0, 0)
       .subscribe({
         next: (data) => {
-          this.incidents.set(data);
+          this.allIncidents.set(data);
+          this.processAndFilter();
           this.loading.set(false);
         },
         error: (err) => {
@@ -131,21 +194,82 @@ export class AvailableIncidentsComponent implements OnInit {
       });
   }
 
-  onRadiusChange(value: string) {
-    this.currentRadius = parseInt(value);
-    this.loadIncidents();
+  processAndFilter() {
+    const workshops = this.myWorkshops();
+    if (workshops.length === 0) {
+      this.filteredIncidents.set([]);
+      return;
+    }
+
+    const processed = this.allIncidents().map(incident => {
+      // Encontrar el taller más cercano para este incidente
+      let minDistance = Infinity;
+      let nearestWorkshop = workshops[0];
+
+      workshops.forEach(ws => {
+        const dist = this.calculateDistance(incident.latitude, incident.longitude, ws.latitude, ws.longitude);
+        if (dist < minDistance) {
+          minDistance = dist;
+          nearestWorkshop = ws;
+        }
+      });
+
+      return { incident, minDistance, nearestWorkshop };
+    });
+
+    // Filtrar por radio si no es "Cualquiera" (0)
+    if (this.currentRadius > 0) {
+      const radiusKm = this.currentRadius / 1000;
+      this.filteredIncidents.set(processed.filter(item => item.minDistance <= radiusKm));
+    } else {
+      this.filteredIncidents.set(processed);
+    }
   }
 
-  acceptIncident(id: number) {
-    if (!confirm('¿Estás seguro de que quieres aceptar esta solicitud de asistencia?')) return;
+  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
 
-    this.incidentService.updateIncident(id, { status: 'assigned' })
+  onRadiusChange(value: string) {
+    this.currentRadius = parseInt(value);
+    this.processAndFilter();
+  }
+
+  askConfirmation(incident: Incident) {
+    this.selectedIncident.set(incident);
+    this.isConfirming.set(true);
+  }
+
+  cancelConfirmation() {
+    this.isConfirming.set(false);
+    this.selectedIncident.set(null);
+  }
+
+  confirmAccept() {
+    const incident = this.selectedIncident();
+    if (!incident) return;
+
+    this.isConfirming.set(false);
+    this.loading.set(true);
+
+    this.incidentService.updateIncident(incident.id, { status: 'assigned' })
       .subscribe({
         next: () => {
-          alert('Solicitud aceptada. Ahora puedes gestionarla en "Mis Asistencias".');
+          this.selectedIncident.set(null);
           this.loadIncidents();
         },
-        error: (err) => alert('Error al aceptar solicitud: ' + (err.error?.detail || 'Error desconocido'))
+        error: (err) => {
+          alert('Error al aceptar solicitud: ' + (err.error?.detail || 'Error desconocido'));
+          this.loading.set(false);
+        }
       });
   }
 }
