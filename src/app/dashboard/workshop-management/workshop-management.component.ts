@@ -132,15 +132,13 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
 
   loadWorkshops(): void {
     this.isLoading.set(true);
-    this.workshopService.getWorkshops().subscribe({
+    this.workshopService.getMyWorkshops().subscribe({
       next: (workshops) => {
-        const currentUser = this.authService.currentUser();
-        const myWs = workshops.filter(w => w.owner_id === currentUser?.id);
-        this.workshopsOwned.set(myWs);
+        this.workshopsOwned.set(workshops);
 
         // Default: select first workshop if exists
-        if (myWs.length > 0) {
-          this.selectWorkshop(myWs[0]);
+        if (workshops.length > 0) {
+          this.selectWorkshop(workshops[0]);
         } else {
           this.newWorkshop();
         }
@@ -206,12 +204,10 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
 
   loadMyWorkshop(): void {
     this.isLoading.set(true);
-    this.workshopService.getWorkshops().subscribe({
+    this.workshopService.getMyWorkshops().subscribe({
       next: (workshops) => {
-        const currentUser = this.authService.currentUser();
-        const myWs = workshops.find(w => w.owner_id === currentUser?.id);
-        
-        if (myWs) {
+        if (workshops.length > 0) {
+          const myWs = workshops[0]; // O cualquier lógica para seleccionar el principal
           this.workshop.set(myWs);
           this.workshopForm.patchValue(myWs);
         }

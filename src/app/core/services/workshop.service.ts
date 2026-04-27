@@ -19,6 +19,11 @@ export class WorkshopService {
     });
   }
 
+  /** Lista talleres del dueño (incluye inactivos) */
+  getMyWorkshops(): Observable<Workshop[]> {
+    return this.http.get<Workshop[]>(`${this.apiUrl}my-workshops`);
+  }
+
   /** Obtiene detalle de un taller */
   getWorkshop(id: number): Observable<Workshop> {
     return this.http.get<Workshop>(`${this.apiUrl}${id}`);
