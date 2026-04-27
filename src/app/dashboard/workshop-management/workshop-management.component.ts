@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 // GestionPersonal is now a separate route/component
 import { WorkshopService } from '../../core/services/workshop.service';
 import { AuthService } from '../../core/services/auth.service';
+import { DialogService } from '../../core/services/dialog.service';
 import { Workshop } from '../../core/models/workshop.model';
 
 @Component({
@@ -32,7 +33,8 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly workshopService: WorkshopService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly dialogService: DialogService
   ) {
     this.workshopForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -259,12 +261,18 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteWorkshop(id: number, event: Event): void {
-    event.stopPropagation(); // Evitar que al hacer clic se seleccione el taller
+  async deleteWorkshop(id: number, event: Event): Promise<void> {
+    event.stopPropagation();
     
-    if (!confirm('¿Estás seguro de que deseas eliminar este taller? Esta acción no se puede deshacer.')) {
-      return;
-    }
+    const confirmed = await this.dialogService.confirm({
+      title: 'Eliminar Taller',
+      message: '¿Estás seguro de que deseas eliminar este taller? Esta acción no se puede deshacer.',
+      confirmText: 'Sí, eliminar',
+      cancelText: 'No, conservar',
+      type: 'danger'
+    });
+
+    if (!confirmed) return;
 
     this.isSaving.set(true);
     this.workshopService.deleteWorkshop(id).subscribe({
