@@ -240,8 +240,19 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
 
     request$.subscribe({
       next: (data) => {
+        const wasUpdate = !!this.workshop();
         this.workshop.set(data);
-        this.showMessage(this.workshop() ? '¡Taller actualizado con éxito!' : '¡Taller registrado con éxito!', 'success');
+        
+        // Actualizar la lista de talleres para que los cambios persistan al cambiar de taller
+        this.workshopsOwned.update(list => {
+          if (wasUpdate) {
+            return list.map(w => w.id === data.id ? data : w);
+          } else {
+            return [...list, data];
+          }
+        });
+
+        this.showMessage(wasUpdate ? '¡Taller actualizado con éxito!' : '¡Taller registrado con éxito!', 'success');
         this.isSaving.set(false);
       },
       error: (err) => {
