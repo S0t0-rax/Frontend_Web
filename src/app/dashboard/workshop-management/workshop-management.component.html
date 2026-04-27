@@ -25,6 +25,7 @@
               </div>
               <div class="ws-actions">
                 <button (click)="selectWorkshop(w)" class="btn-link">Editar</button>
+                <button (click)="deleteWorkshop(w.id, $event)" class="btn-link danger">Eliminar</button>
               </div>
             </li>
           }

@@ -259,6 +259,31 @@ export class WorkshopManagementComponent implements OnInit, OnDestroy {
     });
   }
 
+  deleteWorkshop(id: number, event: Event): void {
+    event.stopPropagation(); // Evitar que al hacer clic se seleccione el taller
+    
+    if (!confirm('¿Estás seguro de que deseas eliminar este taller? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.workshopService.deleteWorkshop(id).subscribe({
+      next: () => {
+        this.workshopsOwned.update(list => list.filter(w => w.id !== id));
+        if (this.workshop()?.id === id) {
+          this.newWorkshop();
+        }
+        this.showMessage('Taller eliminado con éxito.', 'success');
+        this.isSaving.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.showMessage('No se pudo eliminar el taller.', 'error');
+        this.isSaving.set(false);
+      }
+    });
+  }
+
   showMessage(text: string, type: 'success' | 'error'): void {
     this.message.set({ text, type });
     setTimeout(() => this.message.set({ text: '', type: '' }), 4000);

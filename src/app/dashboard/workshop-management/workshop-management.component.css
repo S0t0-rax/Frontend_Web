@@ -116,6 +116,8 @@ input:checked + .slider:before {
 .ws-list li.selected { background: rgba(255,255,255,0.03); }
 .ws-info small { display:block; color:rgba(255,255,255,0.6); }
 .ws-actions .btn-link { background:none; border:none; color:var(--accent); cursor:pointer }
+.ws-actions .btn-link.danger { color: #f87171; margin-left: 8px; }
+.ws-actions .btn-link.danger:hover { color: #ef4444; text-decoration: underline; }
 
 .ws-editor { flex:1 }
 .premium-card { padding:16px; border-radius:10px; background:var(--card-bg) }

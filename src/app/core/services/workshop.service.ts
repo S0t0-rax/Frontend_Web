@@ -39,6 +39,11 @@ export class WorkshopService {
     return this.http.patch<Workshop>(`${this.apiUrl}${id}`, workshop);
   }
 
+  /** Elimina un taller */
+  deleteWorkshop(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${id}`);
+  }
+
   /** Busca talleres cercanos */
   getNearbyWorkshops(lat: number, lng: number, radius = 10000): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}nearby`, {
