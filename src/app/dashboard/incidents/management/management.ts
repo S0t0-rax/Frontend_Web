@@ -94,8 +94,8 @@ import { UserService } from '../../../core/services/user.service';
                 <p>{{ inc.mechanic_name || 'No asignado' }}</p>
               </div>
               <div class="info-group">
-                <label>Estado del Viaje</label>
-                <p class="status-pill" [ngClass]="inc.arrival_status">{{ inc.arrival_status || 'pending' | uppercase }}</p>
+                <label>Estado del Viaje <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: normal; text-transform: none;">(Ubicación actual del mecánico)</span></label>
+                <p class="status-pill" [ngClass]="inc.arrival_status">{{ getArrivalStatusText(inc.arrival_status) | uppercase }}</p>
               </div>
             </div>
           </div>
@@ -213,6 +213,17 @@ export class IncidentManagementComponent implements OnInit {
   availableMechanics = signal<any[]>([]);
   selectedMechanicId = signal<number | null>(null);
   incidentToReassign = signal<Incident | null>(null);
+
+  getArrivalStatusText(status: string | null | undefined): string {
+    switch (status) {
+      case 'pending': return 'Preparándose / Pendiente';
+      case 'on_the_way': return 'En Camino al incidente';
+      case 'arrived': return 'Llegó al lugar';
+      case 'delayed': return 'Retrasado';
+      case 'in_workshop': return 'Regresó al Taller';
+      default: return 'Pendiente';
+    }
+  }
 
   ngOnInit() {
     this.loadMyIncidents();
