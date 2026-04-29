@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IncidentService } from '../../../core/services/incident.service';
 import { Incident, IncidentStatus } from '../../../core/models/incident.model';
 import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-incident-management',
@@ -37,8 +38,8 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
             <button *ngIf="incident.status === 'assigned'" class="btn-action start" (click)="updateStatus(incident.id, 'in_progress')">
               Iniciar Reparación
             </button>
-            <button *ngIf="incident.status === 'in_progress'" class="btn-action done" (click)="updateStatus(incident.id, 'resolved')">
-              Finalizar Trabajo
+            <button *ngIf="incident.status === 'assigned' || incident.status === 'in_progress'" class="btn-action done" (click)="askReassign(incident)">
+              Reasignar trabajo
             </button>
             <button class="btn-action cancel" (click)="updateStatus(incident.id, 'rejected')">
               Cancelar
@@ -100,6 +101,34 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
                 <p class="status-pill" [ngClass]="inc.arrival_status">{{ inc.arrival_status || 'pending' | uppercase }}</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de Reasignación -->
+      <div class="modal-overlay" *ngIf="isReassigning()">
+        <div class="modal-content">
+          <div class="modal-icon" style="font-size: 40px; margin-bottom: 16px;">🔄</div>
+          <h3 style="margin-bottom: 16px;">Reasignar Personal</h3>
+          <p style="margin-bottom: 16px; color: rgba(255,255,255,0.7);">Selecciona al nuevo mecánico para atender este incidente:</p>
+          
+          <div class="mechanic-selector" style="margin: 20px 0; max-height: 200px; overflow-y: auto; text-align: left; padding: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
+            <div *ngIf="availableMechanics().length === 0" style="color: #ef4444; font-size: 0.85rem; padding: 10px; text-align: center;">
+              No hay mecánicos disponibles en este momento.
+            </div>
+            <div *ngFor="let mech of availableMechanics()" style="padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+              <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                <input type="radio" name="mechanic" (change)="selectedMechanicId.set(mech.id)" [checked]="selectedMechanicId() === mech.id" style="width: 20px; height: 20px;">
+                <span style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">{{ mech.full_name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button style="flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; cursor: pointer;" (click)="cancelReassign()">Cancelar</button>
+            <button style="flex: 1; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer;" (click)="confirmReassign()" [disabled]="!selectedMechanicId()">
+              Reasignar
+            </button>
           </div>
         </div>
       </div>
@@ -177,10 +206,16 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
 })
 export class IncidentManagementComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
+  private readonly userService = inject(UserService);
 
   activeIncidents = signal<Incident[]>([]);
   selectedIncident = signal<Incident | null>(null);
   loading = signal(false);
+
+  isReassigning = signal(false);
+  availableMechanics = signal<any[]>([]);
+  selectedMechanicId = signal<number | null>(null);
+  incidentToReassign = signal<Incident | null>(null);
 
   ngOnInit() {
     this.loadMyIncidents();
@@ -210,5 +245,53 @@ export class IncidentManagementComponent implements OnInit {
         },
         error: (err) => alert('Error: ' + (err.error?.detail || 'Error desconocido'))
       });
+  }
+
+  askReassign(incident: Incident) {
+    this.incidentToReassign.set(incident);
+    this.selectedMechanicId.set(null);
+    this.loading.set(true);
+
+    this.userService.getMyStaff().subscribe({
+      next: (staff) => {
+        // Excluimos al mecánico que ya tiene el incidente, si queremos, pero lo más fácil es mostrar a los disponibles
+        const available = staff.filter(m => (m as any).status === 'available' || !(m as any).is_busy);
+        this.availableMechanics.set(available);
+        this.isReassigning.set(true);
+        this.loading.set(false);
+      },
+      error: () => {
+        alert('Error al cargar personal disponible.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  cancelReassign() {
+    this.isReassigning.set(false);
+    this.incidentToReassign.set(null);
+    this.selectedMechanicId.set(null);
+  }
+
+  confirmReassign() {
+    const incident = this.incidentToReassign();
+    const mechId = this.selectedMechanicId();
+    if (!incident || !mechId) return;
+
+    this.isReassigning.set(false);
+    this.loading.set(true);
+
+    this.incidentService.updateIncident(incident.id, { 
+      mechanic_ids: [mechId]
+    }).subscribe({
+      next: () => {
+        alert('Trabajo reasignado correctamente.');
+        this.loadMyIncidents();
+      },
+      error: (err) => {
+        alert('Error al reasignar: ' + (err.error?.detail || 'Error desconocido'));
+        this.loading.set(false);
+      }
+    });
   }
 }
