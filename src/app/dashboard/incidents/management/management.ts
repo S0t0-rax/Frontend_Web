@@ -35,9 +35,6 @@ import { UserService } from '../../../core/services/user.service';
             <button class="btn-action view" (click)="selectedIncident.set(incident)">
               Ver Estado
             </button>
-            <button *ngIf="incident.status === 'assigned'" class="btn-action start" (click)="updateStatus(incident.id, 'in_progress')">
-              Iniciar Reparación
-            </button>
             <button *ngIf="incident.status === 'assigned' || incident.status === 'in_progress'" class="btn-action done" (click)="askReassign(incident)">
               Reasignar trabajo
             </button>

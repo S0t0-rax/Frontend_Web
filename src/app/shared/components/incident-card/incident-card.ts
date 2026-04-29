@@ -9,7 +9,7 @@ import { Incident } from '../../../core/models/incident.model';
   template: `
     <div class="incident-card" [ngClass]="incident.severity_level">
       <div class="card-header">
-        <span class="badge" [ngClass]="incident.status">{{ incident.status | titlecase }}</span>
+        <span class="badge" [ngClass]="incident.status">{{ getStatusText(incident.status) }}</span>
         <span class="date">{{ incident.reported_at | date:'short' }}</span>
       </div>
       
@@ -80,4 +80,16 @@ import { Incident } from '../../../core/models/incident.model';
 })
 export class IncidentCardComponent {
   @Input({ required: true }) incident!: Incident;
+
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'open': return 'Buscando Taller';
+      case 'assigned': return 'Esperando al Mecánico';
+      case 'in_progress': return 'Reparación en Curso';
+      case 'resolved': return 'Finalizado';
+      case 'cancelled': return 'Cancelado';
+      case 'rejected': return 'Rechazado';
+      default: return status;
+    }
+  }
 }
