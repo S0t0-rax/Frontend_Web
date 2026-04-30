@@ -59,9 +59,15 @@ import { DialogService } from '../../../core/services/dialog.service';
             </span>
             <span class="distance-value">{{ (item.minDistance).toFixed(1) }} km de distancia</span>
           </div>
-          <button class="btn-primary full-width" (click)="askConfirmation(item.incident, item.nearestWorkshop)">
-            Aceptar Solicitud
-          </button>
+          <div class="action-buttons">
+            <button class="btn-primary full-width" (click)="askConfirmation(item.incident, item.nearestWorkshop)">
+              Aceptar Solicitud
+            </button>
+            <button class="btn-secondary full-width" *ngIf="item.incident.photos && item.incident.photos.length > 0" (click)="openImage(item.incident.photos[0].storage_url)" style="margin-top: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: text-bottom;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              Ver Imagen
+            </button>
+          </div>
         </app-incident-card>
       </div>
 
@@ -91,6 +97,14 @@ import { DialogService } from '../../../core/services/dialog.service';
               Confirmar y Aceptar
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Modal de Imagen -->
+      <div class="modal-overlay" *ngIf="viewingImage()" (click)="closeImage()">
+        <div class="modal-content image-modal" (click)="$event.stopPropagation()">
+          <button class="close-btn" (click)="closeImage()">✕</button>
+          <img [src]="viewingImage()" alt="Imagen del incidente" class="incident-image">
         </div>
       </div>
     </div>
@@ -185,6 +199,10 @@ import { DialogService } from '../../../core/services/dialog.service';
       border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;
     }
 
+    .image-modal { padding: 16px; position: relative; background: transparent; border: none; box-shadow: none; display: flex; flex-direction: column; align-items: center; max-width: 90vw; }
+    .incident-image { max-width: 100%; max-height: 80vh; border-radius: 12px; object-fit: contain; }
+    .close-btn { position: absolute; top: -16px; right: 0; background: #ef4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   `]
@@ -201,6 +219,7 @@ export class AvailableIncidentsComponent implements OnInit {
   filteredIncidents = signal<any[]>([]);
   loading = signal(false);
   isConfirming = signal(false);
+  viewingImage = signal<string | null>(null);
   
   selectedIncident = signal<Incident | null>(null);
   selectedWorkshop = signal<Workshop | null>(null);
@@ -320,6 +339,14 @@ export class AvailableIncidentsComponent implements OnInit {
     } else {
       this.selectedMechanicIds.set([...ids, id]);
     }
+  }
+
+  openImage(url: string) {
+    this.viewingImage.set(url);
+  }
+
+  closeImage() {
+    this.viewingImage.set(null);
   }
 
   cancelConfirmation() {
