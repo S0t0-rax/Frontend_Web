@@ -8,6 +8,7 @@ import { Workshop } from '../../../core/models/workshop.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService, MechanicStaff } from '../../../core/services/user.service';
 import { DialogService } from '../../../core/services/dialog.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-available-incidents',
@@ -104,7 +105,12 @@ import { DialogService } from '../../../core/services/dialog.service';
       <div class="modal-overlay" *ngIf="viewingImage()" (click)="closeImage()">
         <div class="modal-content image-modal" (click)="$event.stopPropagation()">
           <button class="close-btn" (click)="closeImage()">✕</button>
-          <img [src]="viewingImage()" alt="Imagen del incidente" class="incident-image">
+          <div *ngIf="imageLoadError()" class="image-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <p style="margin-top:12px; color: rgba(255,255,255,0.5); font-size: 0.9rem;">No se pudo cargar la imagen.</p>
+            <p style="margin-top:4px; color: rgba(255,255,255,0.3); font-size: 0.75rem; word-break: break-all; max-width: 300px;">{{ viewingImage() }}</p>
+          </div>
+          <img *ngIf="!imageLoadError()" [src]="viewingImage()" alt="Imagen del incidente" class="incident-image" (error)="imageLoadError.set(true)">
         </div>
       </div>
     </div>
@@ -199,9 +205,11 @@ import { DialogService } from '../../../core/services/dialog.service';
       border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;
     }
 
-    .image-modal { padding: 16px; position: relative; background: transparent; border: none; box-shadow: none; display: flex; flex-direction: column; align-items: center; max-width: 90vw; }
+    .image-modal { padding: 24px 16px 16px; position: relative; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; max-width: 90vw; min-width: 280px; }
     .incident-image { max-width: 100%; max-height: 80vh; border-radius: 12px; object-fit: contain; }
-    .close-btn { position: absolute; top: -16px; right: 0; background: #ef4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+    .close-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 8px rgba(239,68,68,0.4); }
+    .image-error { display: flex; flex-direction: column; align-items: center; padding: 24px; text-align: center; }
+
 
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -220,6 +228,7 @@ export class AvailableIncidentsComponent implements OnInit {
   loading = signal(false);
   isConfirming = signal(false);
   viewingImage = signal<string | null>(null);
+  imageLoadError = signal(false);
   
   selectedIncident = signal<Incident | null>(null);
   selectedWorkshop = signal<Workshop | null>(null);
@@ -341,12 +350,29 @@ export class AvailableIncidentsComponent implements OnInit {
     }
   }
 
-  openImage(url: string) {
+  openImage(rawUrl: string) {
+    // Normalizar la URL: si viene con el dominio hardcodeado del railway pero el backend
+    // actual es diferente, reemplazamos el origen. Además si es path relativo lo completamos.
+    let url = rawUrl;
+    try {
+      const parsed = new URL(rawUrl);
+      // Si la URL es del tipo /uploads/... servida por el backend, usar el apiUrl actual
+      if (parsed.pathname.startsWith('/uploads/')) {
+        url = `${environment.apiUrl}${parsed.pathname}`;
+      }
+    } catch {
+      // URL relativa
+      if (rawUrl.startsWith('/uploads/')) {
+        url = `${environment.apiUrl}${rawUrl}`;
+      }
+    }
+    this.imageLoadError.set(false);
     this.viewingImage.set(url);
   }
 
   closeImage() {
     this.viewingImage.set(null);
+    this.imageLoadError.set(false);
   }
 
   cancelConfirmation() {
