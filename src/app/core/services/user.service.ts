@@ -38,8 +38,12 @@ export class UserService {
   // Assign or update a mechanic's workshop
   assignMechanicWorkshop(id: number, workshop_id?: number): Observable<UserResponse> {
     const qs = workshop_id ? `?workshop_id=${workshop_id}` : '?workshop_id=';
-    // New backend endpoint: PUT /api/v1/users/{id}/assign-workshop?workshop_id={id|null}
     return this.http.put<UserResponse>(`${this.apiUrl}/${id}/assign-workshop${qs}`, {});
+  }
+
+  // Delete/Deactivate a mechanic
+  deleteMechanic(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
   // Check if assign-workshop endpoint exists (OPTIONS)

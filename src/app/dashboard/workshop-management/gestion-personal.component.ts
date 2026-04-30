@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../../core/services/user.service';
@@ -160,8 +160,43 @@ export class GestionPersonalComponent implements OnInit {
     });
   }
 
+  searchQuery = signal('');
+  
+  // Lista filtrada de personal según la búsqueda y filtrando los inactivos
+  filteredStaff = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    // Siempre ocultamos los mecánicos eliminados (is_active === false)
+    const activeStaff = this.staff().filter(s => s.is_active !== false);
+    
+    if (!query) return activeStaff;
+    
+    return activeStaff.filter(s => {
+      const matchName = s.full_name?.toLowerCase().includes(query) || false;
+      const matchEmail = s.email?.toLowerCase().includes(query) || false;
+      const matchWorkshop = s.workshop_name?.toLowerCase().includes(query) || false;
+      const matchTicket = s.active_incident_ids?.some((id: number) => id.toString().includes(query)) || false;
+      
+      return matchName || matchEmail || matchWorkshop || matchTicket;
+    });
+  });
+
   showMessage(text: string, type: 'success'|'error') {
     this.message.set({ text, type });
     setTimeout(() => this.message.set({ text: '', type: '' }), 4000);
+  }
+
+  deleteMechanic(mech: any): void {
+    if (confirm(`¿Estás seguro de que deseas eliminar al mecánico ${mech.full_name || mech.email}? Esta acción no se puede deshacer.`)) {
+      this.userService.deleteMechanic(mech.id).subscribe({
+        next: () => {
+          this.showMessage('Mecánico eliminado correctamente.', 'success');
+          this.loadStaff();
+        },
+        error: (err) => {
+          console.error(err);
+          this.showMessage('Error al eliminar el mecánico.', 'error');
+        }
+      });
+    }
   }
 }

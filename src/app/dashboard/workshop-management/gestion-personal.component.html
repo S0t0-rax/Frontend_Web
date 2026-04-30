@@ -4,43 +4,7 @@
   <div *ngIf="isLoading()" class="loading">Cargando personal...</div>
 
   <div *ngIf="!isLoading()">
-    <div class="staff-list">
-      <div *ngFor="let s of staff()" class="staff-item">
-        <div class="si-left">
-          <div class="avatar">{{ (s.full_name || s.email).split(' ').map(n=>n[0]).slice(0,2).join('') }}</div>
-        </div>
-        <div class="si-body">
-          <div class="si-title">{{ s.full_name || 'Sin nombre' }} <span class="email">{{ s.email }}</span></div>
-          <div class="si-meta">
-            <span class="phone">{{ s.phone || '-' }}</span>
-            <span class="status" [class.busy]="s.active_tasks_count > 0" [class.free]="s.active_tasks_count === 0">
-              {{ s.active_tasks_count > 0 ? 'Ocupado (' + s.active_tasks_count + ')' : 'Disponible' }}
-            </span>
-            <div *ngIf="s.active_incident_ids && s.active_incident_ids.length > 0" class="task-list">
-              <span *ngFor="let id of s.active_incident_ids" class="task-badge">Ticket #{{ id }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="si-right">
-          <ng-container *ngIf="editingId !== s.id; else editBlock">
-            <div class="workshop-pill">{{ s.workshop_name || '-' }}</div>
-            <button class="btn-link small" (click)="startEditAssignment(s)">Editar</button>
-          </ng-container>
-          <ng-template #editBlock>
-            <select [(ngModel)]="editingWorkshopSelection" [ngModelOptions]="{standalone: true}" class="theme-input small-select">
-              <option [ngValue]="null">Sin asignar</option>
-              <option *ngFor="let w of workshops" [ngValue]="w.id">{{ w.name }}</option>
-            </select>
-            <div class="edit-actions">
-              <button class="btn-primary small" (click)="saveAssignment(s)">Guardar</button>
-              <button class="btn-secondary small" (click)="cancelEditAssignment()">Cancelar</button>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-    </div>
-
-    <div class="create-section">
+    <div class="create-section" style="margin-bottom: 30px;">
       <h4>Crear Mecánico</h4>
       <form [formGroup]="createForm" (ngSubmit)="createMechanic()">
         <div class="row">
@@ -60,6 +24,52 @@
         </div>
         <button type="submit" [disabled]="isCreating()">{{ isCreating() ? 'Creando...' : 'Crear Mecánico' }}</button>
       </form>
+    </div>
+
+    <div class="filters-section" style="margin-bottom: 20px;">
+      <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar por nombre, correo, taller o número de ticket..." class="theme-input search-input" style="width: 100%;">
+    </div>
+
+    <div class="staff-list">
+      <div *ngFor="let s of filteredStaff()" class="staff-item">
+        <div class="si-left">
+          <div class="avatar">{{ (s.full_name || s.email).split(' ').map(n=>n[0]).slice(0,2).join('') }}</div>
+        </div>
+        <div class="si-body">
+          <div class="si-title">{{ s.full_name || 'Sin nombre' }} <span class="email">{{ s.email }}</span></div>
+          <div class="si-meta">
+            <span class="phone">{{ s.phone || '-' }}</span>
+            <span class="status" [class.busy]="s.active_tasks_count > 0" [class.free]="s.active_tasks_count === 0">
+              {{ s.active_tasks_count > 0 ? 'Ocupado (' + s.active_tasks_count + ')' : 'Disponible' }}
+            </span>
+            <div *ngIf="s.active_incident_ids && s.active_incident_ids.length > 0" class="task-list">
+              <span *ngFor="let id of s.active_incident_ids" class="task-badge">Ticket #{{ id }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="si-right">
+          <ng-container *ngIf="editingId !== s.id; else editBlock">
+            <div class="workshop-pill">{{ s.workshop_name || '-' }}</div>
+            <div class="action-buttons" style="display: flex; gap: 8px;">
+              <button class="btn-link small" (click)="startEditAssignment(s)">Editar</button>
+              <button class="btn-link small text-danger" style="color: #ef4444;" (click)="deleteMechanic(s)">Eliminar</button>
+            </div>
+          </ng-container>
+          <ng-template #editBlock>
+            <select [(ngModel)]="editingWorkshopSelection" [ngModelOptions]="{standalone: true}" class="theme-input small-select">
+              <option [ngValue]="null">Sin asignar</option>
+              <option *ngFor="let w of workshops" [ngValue]="w.id">{{ w.name }}</option>
+            </select>
+            <div class="edit-actions">
+              <button class="btn-primary small" (click)="saveAssignment(s)">Guardar</button>
+              <button class="btn-secondary small" (click)="cancelEditAssignment()">Cancelar</button>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+      </div>
     </div>
   </div>
 
