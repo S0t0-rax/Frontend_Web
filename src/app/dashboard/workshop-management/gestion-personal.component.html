@@ -26,8 +26,14 @@
       </form>
     </div>
 
-    <div class="filters-section" style="margin-bottom: 20px;">
-      <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar por nombre, correo, taller o número de ticket..." class="theme-input search-input" style="width: 100%;">
+    <div class="filters-section">
+      <div class="search-container">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar por nombre, correo, taller o número de ticket..." class="search-input">
+      </div>
     </div>
 
     <div class="staff-list">
@@ -52,7 +58,7 @@
             <div class="workshop-pill">{{ s.workshop_name || '-' }}</div>
             <div class="action-buttons" style="display: flex; gap: 8px;">
               <button class="btn-link small" (click)="startEditAssignment(s)">Editar</button>
-              <button class="btn-link small text-danger" style="color: #ef4444;" (click)="deleteMechanic(s)">Eliminar</button>
+              <button class="btn-link small text-danger" style="color: #ef4444;" (click)="confirmDelete(s)">Eliminar</button>
             </div>
           </ng-container>
           <ng-template #editBlock>
@@ -70,4 +76,21 @@
     </div>
   </div>
   <div *ngIf="message().text" class="msg" [ngClass]="message().type">{{ message().text }}</div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal-overlay" *ngIf="mechanicToDelete">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Confirmar Eliminación</h4>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar al mecánico <strong style="color: var(--color-amber, #f59e0b);">{{ mechanicToDelete.full_name || mechanicToDelete.email }}</strong>?</p>
+        <p class="text-danger-muted" style="margin-top: 8px; font-size: 0.9rem; color: #ef4444; opacity: 0.8;">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="cancelDelete()">Cancelar</button>
+        <button class="btn-danger" (click)="executeDelete()">Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -24,6 +24,8 @@ export class GestionPersonalComponent implements OnInit {
   editingId: number | null = null;
   editingWorkshopSelection: number | null = null;
   assignEndpointAvailable = signal(false);
+  
+  mechanicToDelete: any = null;
 
   constructor(
     private readonly userService: UserService,
@@ -185,18 +187,29 @@ export class GestionPersonalComponent implements OnInit {
     setTimeout(() => this.message.set({ text: '', type: '' }), 4000);
   }
 
-  deleteMechanic(mech: any): void {
-    if (confirm(`¿Estás seguro de que deseas eliminar al mecánico ${mech.full_name || mech.email}? Esta acción no se puede deshacer.`)) {
-      this.userService.deleteMechanic(mech.id).subscribe({
-        next: () => {
-          this.showMessage('Mecánico eliminado correctamente.', 'success');
-          this.loadStaff();
-        },
-        error: (err) => {
-          console.error(err);
-          this.showMessage('Error al eliminar el mecánico.', 'error');
-        }
-      });
-    }
+  confirmDelete(mech: any): void {
+    this.mechanicToDelete = mech;
+  }
+
+  cancelDelete(): void {
+    this.mechanicToDelete = null;
+  }
+
+  executeDelete(): void {
+    if (!this.mechanicToDelete) return;
+    const mech = this.mechanicToDelete;
+    
+    this.userService.deleteMechanic(mech.id).subscribe({
+      next: () => {
+        this.showMessage('Mecánico eliminado correctamente.', 'success');
+        this.loadStaff();
+        this.mechanicToDelete = null;
+      },
+      error: (err) => {
+        console.error(err);
+        this.showMessage('Error al eliminar el mecánico.', 'error');
+        this.mechanicToDelete = null;
+      }
+    });
   }
 }
