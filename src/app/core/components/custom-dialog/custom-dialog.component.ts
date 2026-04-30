@@ -16,7 +16,7 @@ import { DialogService } from '../../services/dialog.service';
           <p>{{ dialog.config()?.message }}</p>
         </div>
         <div class="dialog-footer">
-          <button class="btn-cancel" (click)="onCancel()">{{ dialog.config()?.cancelText || 'Cancelar' }}</button>
+          <button *ngIf="dialog.config()?.type !== 'info'" class="btn-cancel" (click)="onCancel()">{{ dialog.config()?.cancelText || 'Cancelar' }}</button>
           <button class="btn-confirm" (click)="onConfirm()">{{ dialog.config()?.confirmText || 'Aceptar' }}</button>
         </div>
       </div>

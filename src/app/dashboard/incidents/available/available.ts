@@ -7,6 +7,7 @@ import { WorkshopService } from '../../../core/services/workshop.service';
 import { Workshop } from '../../../core/models/workshop.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService, MechanicStaff } from '../../../core/services/user.service';
+import { DialogService } from '../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-available-incidents',
@@ -193,6 +194,7 @@ export class AvailableIncidentsComponent implements OnInit {
   private readonly workshopService = inject(WorkshopService);
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly dialog = inject(DialogService);
   
   allIncidents = signal<Incident[]>([]);
   myWorkshops = signal<Workshop[]>([]);
@@ -305,7 +307,7 @@ export class AvailableIncidentsComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        alert('Error al cargar personal disponible.');
+        this.dialog.confirm({ title: 'Error', message: 'Error al cargar personal disponible.', type: 'danger' });
         this.loading.set(false);
       }
     });
@@ -348,7 +350,7 @@ export class AvailableIncidentsComponent implements OnInit {
           this.loadIncidents();
         },
         error: (err: any) => {
-          alert('Error al aceptar solicitud: ' + (err.error?.detail || 'Error desconocido'));
+          this.dialog.confirm({ title: 'Error', message: 'Error al aceptar solicitud: ' + (err.error?.detail || 'Error desconocido'), type: 'danger' });
           this.loading.set(false);
         }
       });

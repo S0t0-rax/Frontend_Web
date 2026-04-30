@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IncidentService } from '../../../core/services/incident.service';
 import { Incident, IncidentStatus } from '../../../core/models/incident.model';
 import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card';
+import { DialogService } from '../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-mechanic-tasks',
@@ -111,6 +112,7 @@ import { IncidentCardComponent } from '../../../shared/components/incident-card/
 })
 export class TasksComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
+  private readonly dialog = inject(DialogService);
   
   tasks = signal<Incident[]>([]);
   loading = signal(false);
@@ -146,7 +148,7 @@ export class TasksComponent implements OnInit {
       next: () => this.loadTasks(),
       error: (err) => {
         console.error('Error al actualizar estado de llegada:', err);
-        alert('No se pudo actualizar el estado de llegada. Por favor, intenta de nuevo.');
+        this.dialog.confirm({ title: 'Error', message: 'No se pudo actualizar el estado de llegada. Por favor, intenta de nuevo.', type: 'danger' });
       }
     });
   }
@@ -156,7 +158,7 @@ export class TasksComponent implements OnInit {
       next: () => this.loadTasks(),
       error: (err) => {
         console.error('Error al actualizar estado del incidente:', err);
-        alert('Hubo un error al procesar la solicitud. Por favor, intenta de nuevo.');
+        this.dialog.confirm({ title: 'Error', message: 'Hubo un error al procesar la solicitud. Por favor, intenta de nuevo.', type: 'danger' });
       }
     });
   }

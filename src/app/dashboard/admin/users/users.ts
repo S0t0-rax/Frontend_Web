@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { UserResponse, ROLE_LABELS } from '../../../core/models/auth.model';
 import { UserAdminUpdate } from '../../../core/models/admin.model';
+import { DialogService } from '../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-users',
@@ -30,7 +31,7 @@ export class Users implements OnInit {
     { value: 'admin', label: 'Administrador' }
   ];
 
-  constructor(private adminService: AdminService, private fb: FormBuilder) {
+  constructor(private adminService: AdminService, private fb: FormBuilder, private dialog: DialogService) {
     this.editForm = this.fb.group({
       full_name: [''],
       phone: [''],
@@ -91,8 +92,14 @@ export class Users implements OnInit {
     });
   }
 
-  logicalDelete(user: UserResponse): void {
-    if (confirm(`¿Estás seguro de suspender a ${user.full_name}?`)) {
+  async logicalDelete(user: UserResponse): Promise<void> {
+    const confirmed = await this.dialog.confirm({
+      title: 'Suspender Usuario',
+      message: `¿Estás seguro de suspender a ${user.full_name}?`,
+      type: 'danger'
+    });
+
+    if (confirmed) {
       this.adminService.deleteUser(user.id).subscribe({
         next: () => {
           this.users.update(list => list.map(u => {

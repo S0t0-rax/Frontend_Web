@@ -4,6 +4,7 @@ import { IncidentService } from '../../../core/services/incident.service';
 import { Incident, IncidentStatus } from '../../../core/models/incident.model';
 import { IncidentCardComponent } from '../../../shared/components/incident-card/incident-card';
 import { UserService } from '../../../core/services/user.service';
+import { DialogService } from '../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-incident-management',
@@ -204,6 +205,7 @@ import { UserService } from '../../../core/services/user.service';
 export class IncidentManagementComponent implements OnInit {
   private readonly incidentService = inject(IncidentService);
   private readonly userService = inject(UserService);
+  private readonly dialog = inject(DialogService);
 
   activeIncidents = signal<Incident[]>([]);
   selectedIncident = signal<Incident | null>(null);
@@ -241,17 +243,22 @@ export class IncidentManagementComponent implements OnInit {
       });
   }
 
-  updateStatus(id: number, status: IncidentStatus) {
+  async updateStatus(id: number, status: IncidentStatus) {
     const msg = status === 'resolved' ? '¿Confirmas que el trabajo ha sido finalizado?' : '¿Confirmas el cambio de estado?';
-    if (!confirm(msg)) return;
+    const confirmed = await this.dialog.confirm({
+      title: 'Confirmar Acción',
+      message: msg,
+      type: 'confirm'
+    });
+    if (!confirmed) return;
 
     this.incidentService.updateIncident(id, { status })
       .subscribe({
         next: () => {
-          alert('Estado actualizado correctamente.');
+          this.dialog.confirm({ title: 'Éxito', message: 'Estado actualizado correctamente.', type: 'info' });
           this.loadMyIncidents();
         },
-        error: (err) => alert('Error: ' + (err.error?.detail || 'Error desconocido'))
+        error: (err) => this.dialog.confirm({ title: 'Error', message: 'Error: ' + (err.error?.detail || 'Error desconocido'), type: 'danger' })
       });
   }
 
@@ -269,7 +276,7 @@ export class IncidentManagementComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        alert('Error al cargar personal disponible.');
+        this.dialog.confirm({ title: 'Error', message: 'Error al cargar personal disponible.', type: 'danger' });
         this.loading.set(false);
       }
     });
@@ -293,11 +300,11 @@ export class IncidentManagementComponent implements OnInit {
       mechanic_ids: [mechId]
     }).subscribe({
       next: () => {
-        alert('Trabajo reasignado correctamente.');
+        this.dialog.confirm({ title: 'Éxito', message: 'Trabajo reasignado correctamente.', type: 'info' });
         this.loadMyIncidents();
       },
       error: (err) => {
-        alert('Error al reasignar: ' + (err.error?.detail || 'Error desconocido'));
+        this.dialog.confirm({ title: 'Error', message: 'Error al reasignar: ' + (err.error?.detail || 'Error desconocido'), type: 'danger' });
         this.loading.set(false);
       }
     });
