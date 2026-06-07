@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.servmeca.com/api'
+  apiUrl: 'https://web-production-599cc.up.railway.app/api'
 };
