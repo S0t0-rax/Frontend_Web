@@ -60,7 +60,7 @@
           <ng-container *ngIf="editingId !== s.id; else editBlock">
             <div class="workshop-pill">{{ s.workshop_name || '-' }}</div>
             <div class="action-buttons" style="display: flex; gap: 8px;">
-              <button *ngIf="s.total_ratings > 0" class="btn-link small" style="color: #3b82f6;" (click)="viewReviews(s)">Ver Reseñas</button>
+              <button class="btn-link small" style="color: #3b82f6;" (click)="viewReviews(s)">Ver Reseñas</button>
               <button class="btn-link small" (click)="startEditAssignment(s)">Editar</button>
               <button class="btn-link small text-danger" style="color: #ef4444;" (click)="confirmDelete(s)">Eliminar</button>
             </div>
