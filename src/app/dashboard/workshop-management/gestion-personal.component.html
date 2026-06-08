@@ -51,12 +51,16 @@
             <div *ngIf="s.active_incident_ids && s.active_incident_ids.length > 0" class="task-list">
               <span *ngFor="let id of s.active_incident_ids" class="task-badge">Ticket #{{ id }}</span>
             </div>
+            <div class="rating-info" *ngIf="s.total_ratings > 0" style="margin-top: 6px; font-size: 0.85rem; color: #f59e0b; font-weight: 500;">
+              ⭐ {{ s.average_rating | number:'1.1-1' }} ({{ s.total_ratings }} reseña{{ s.total_ratings !== 1 ? 's' : '' }})
+            </div>
           </div>
         </div>
         <div class="si-right">
           <ng-container *ngIf="editingId !== s.id; else editBlock">
             <div class="workshop-pill">{{ s.workshop_name || '-' }}</div>
             <div class="action-buttons" style="display: flex; gap: 8px;">
+              <button *ngIf="s.total_ratings > 0" class="btn-link small" style="color: #3b82f6;" (click)="viewReviews(s)">Ver Reseñas</button>
               <button class="btn-link small" (click)="startEditAssignment(s)">Editar</button>
               <button class="btn-link small text-danger" style="color: #ef4444;" (click)="confirmDelete(s)">Eliminar</button>
             </div>
@@ -90,6 +94,41 @@
       <div class="modal-actions">
         <button class="btn-secondary" (click)="cancelDelete()">Cancelar</button>
         <button class="btn-danger" (click)="executeDelete()">Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Reseñas -->
+  <div class="modal-overlay" *ngIf="mechanicToReview">
+    <div class="modal-content reviews-modal">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+        <div>
+          <h4 style="margin:0; color: #f1f1f4;">Reseñas de {{ mechanicToReview.full_name }}</h4>
+          <span style="font-size: 0.9rem; color: #f59e0b; font-weight: bold;">⭐ {{ mechanicToReview.average_rating | number:'1.1-1' }} Promedio</span>
+        </div>
+        <button class="btn-close" (click)="closeReviews()" style="background:none; border:none; font-size: 1.5rem; cursor: pointer; color: #a1a1aa;">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+        <div *ngIf="mechanicToReview.reviews?.length === 0" style="text-align: center; color: #a1a1aa; padding: 20px;">
+          No hay reseñas aún.
+        </div>
+        <div *ngFor="let review of mechanicToReview.reviews" class="review-card" style="padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.2);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong style="color: #e2e8f0; font-size: 0.95rem;">{{ review.client_name }}</strong>
+            <span style="color: #94a3b8; font-size: 0.8rem;">{{ review.date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div style="color: #f59e0b; margin-bottom: 6px; font-size: 0.9rem;">
+            <ng-container *ngFor="let i of [1,2,3,4,5]">
+              <span *ngIf="i <= review.rating">★</span>
+              <span *ngIf="i > review.rating" style="color: #475569;">☆</span>
+            </ng-container>
+          </div>
+          <p *ngIf="review.review_comment" style="margin: 0; font-size: 0.9rem; color: #cbd5e1; font-style: italic;">"{{ review.review_comment }}"</p>
+          <p *ngIf="!review.review_comment" style="margin: 0; font-size: 0.85rem; color: #64748b;">(Sin comentario)</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="closeReviews()" style="background: linear-gradient(90deg,#3b82f6,#2563eb); color: white; border: none;">Cerrar</button>
       </div>
     </div>
   </div>

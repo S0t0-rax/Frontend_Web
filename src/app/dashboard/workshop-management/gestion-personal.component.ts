@@ -26,6 +26,7 @@ export class GestionPersonalComponent implements OnInit {
   assignEndpointAvailable = signal(false);
   
   mechanicToDelete: any = null;
+  mechanicToReview: any = null;
 
   constructor(
     private readonly userService: UserService,
@@ -211,5 +212,13 @@ export class GestionPersonalComponent implements OnInit {
         this.mechanicToDelete = null;
       }
     });
+  }
+
+  viewReviews(mech: any): void {
+    this.mechanicToReview = mech;
+  }
+
+  closeReviews(): void {
+    this.mechanicToReview = null;
   }
 }

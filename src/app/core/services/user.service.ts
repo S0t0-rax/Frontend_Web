@@ -16,6 +16,9 @@ export interface MechanicStaff {
   is_busy: boolean;
   workshop_id?: number;
   workshop_name?: string;
+  average_rating: number;
+  total_ratings: number;
+  reviews: any[];
 }
 
 @Injectable({ providedIn: 'root' })
