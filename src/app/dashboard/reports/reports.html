@@ -1,0 +1,57 @@
+<div class="reports-container">
+  <div class="header">
+    <h1>📈 Generador de Reportes y Analíticas</h1>
+    <p>Exporta la información de los servicios realizados según los filtros aplicados.</p>
+  </div>
+
+  <div class="filters-card">
+    <h3>Filtros de Búsqueda</h3>
+    
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="startDate">Fecha Inicio</label>
+        <input type="date" id="startDate" [(ngModel)]="startDate" class="form-control">
+      </div>
+      
+      <div class="filter-group">
+        <label for="endDate">Fecha Fin</label>
+        <input type="date" id="endDate" [(ngModel)]="endDate" class="form-control">
+      </div>
+      
+      <div class="filter-group">
+        <label for="status">Estado del Servicio</label>
+        <select id="status" [(ngModel)]="status" class="form-control">
+          <option value="">-- Todos los estados --</option>
+          <option value="resolved">Finalizado (Resuelto)</option>
+          <option value="cancelled">Cancelado</option>
+          <option value="open">Abierto (Esperando)</option>
+          <option value="assigned">Asignado</option>
+          <option value="in_progress">En Progreso</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions-card">
+    <h3>Descargar Reporte</h3>
+    <p class="subtitle">Se incluirán todos los registros que coincidan con los filtros seleccionados arriba.</p>
+    
+    <div class="button-group">
+      <button 
+        class="btn btn-excel" 
+        (click)="downloadExcel()" 
+        [disabled]="isDownloadingExcel">
+        <span class="icon">📊</span>
+        {{ isDownloadingExcel ? 'Generando...' : 'Descargar Excel (.xlsx)' }}
+      </button>
+
+      <button 
+        class="btn btn-pdf" 
+        (click)="downloadPdf()" 
+        [disabled]="isDownloadingPdf">
+        <span class="icon">📄</span>
+        {{ isDownloadingPdf ? 'Generando...' : 'Descargar PDF (.pdf)' }}
+      </button>
+    </div>
+  </div>
+</div>

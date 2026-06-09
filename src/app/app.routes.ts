@@ -12,6 +12,7 @@ import { Profile } from './dashboard/profile/profile';
 import { WorkshopManagementComponent } from './dashboard/workshop-management/workshop-management.component';
 import { GestionPersonalComponent } from './dashboard/workshop-management/gestion-personal.component';
 import { authGuard, publicGuard, adminGuard } from './core/guards/auth.guard';
+import { ReportsComponent } from './dashboard/reports/reports';
 
 
 export const routes: Routes = [
@@ -32,6 +33,7 @@ export const routes: Routes = [
       },
       { path: 'admin/monitoring', component: MonitoringComponent, canActivate: [adminGuard] },
       { path: 'admin/bitacora', component: Bitacora, canActivate: [adminGuard] },
+      { path: 'admin/reports', component: ReportsComponent, canActivate: [adminGuard] },
       { 
         path: 'incidents/available', 
         loadComponent: () => import('./dashboard/incidents/available/available').then(m => m.AvailableIncidentsComponent) 
@@ -46,7 +48,8 @@ export const routes: Routes = [
         path: 'mechanic/tasks', 
         loadComponent: () => import('./dashboard/mechanic/tasks/tasks.component').then(m => m.TasksComponent) 
       },
-      { path: 'profile', component: Profile }
+      { path: 'profile', component: Profile },
+      { path: 'reports', component: ReportsComponent }
 
     ]
   },
