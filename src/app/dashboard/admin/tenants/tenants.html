@@ -1,0 +1,98 @@
+<div class="page-header">
+  <h2 class="page-title">🏢 Gestión de Suscripciones (Empresas SaaS)</h2>
+  <button class="btn-primary" (click)="openRegisterModal()">+ Registrar Empresa</button>
+</div>
+
+<div class="table-container">
+  <table class="modern-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre del Taller / Empresa</th>
+        <th>NIT / Doc</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="isLoading()">
+        <td colspan="5" style="text-align: center; padding: 32px; color: #94a3b8;">Cargando empresas...</td>
+      </tr>
+      <tr *ngIf="!isLoading() && tenants().length === 0">
+        <td colspan="5" style="text-align: center; padding: 32px; color: #94a3b8;">No hay empresas registradas aún.</td>
+      </tr>
+      <tr *ngFor="let tenant of tenants()">
+        <td style="font-family: monospace; color: #94a3b8;">#{{ tenant.id }}</td>
+        <td style="font-weight: 500;">{{ tenant.name }}</td>
+        <td style="color: #94a3b8;">{{ tenant.tax_id || 'N/A' }}</td>
+        <td>
+          <span class="badge" [ngClass]="tenant.is_active ? 'badge-active' : 'badge-inactive'">
+            {{ tenant.is_active ? 'Activo' : 'Suspendido' }}
+          </span>
+        </td>
+        <td class="actions-cell">
+          <button 
+            *ngIf="tenant.is_active" 
+            class="btn-action btn-danger" 
+            (click)="toggleStatus(tenant)"
+            title="Suspender acceso">
+            Suspender
+          </button>
+          <button 
+            *ngIf="!tenant.is_active" 
+            class="btn-action btn-success" 
+            (click)="toggleStatus(tenant)"
+            title="Reactivar acceso">
+            Activar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal de Registro -->
+<div class="modal-overlay" *ngIf="showModal()">
+  <div class="modal-content">
+    <h3>Registrar Nueva Empresa (SaaS)</h3>
+    <form [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+      
+      <!-- Datos de la Empresa -->
+      <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1)">
+        <h4 style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 12px; margin-top: 0">Datos del Taller</h4>
+        <div class="form-group">
+          <label>Nombre Comercial *</label>
+          <input type="text" formControlName="tenant_name" class="form-control" placeholder="Ej: Mecánica Los Rápidos" required>
+        </div>
+        <div class="form-group">
+          <label>NIT / Identificación (Opcional)</label>
+          <input type="text" formControlName="tax_id" class="form-control" placeholder="Ej: 123456789">
+        </div>
+      </div>
+
+      <!-- Datos del Administrador -->
+      <div>
+        <h4 style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 12px; margin-top: 0">Cuenta del Dueño</h4>
+        <div class="form-group">
+          <label>Nombre Completo del Dueño *</label>
+          <input type="text" formControlName="admin_full_name" class="form-control" placeholder="Ej: Juan Pérez" required>
+        </div>
+        <div class="form-group">
+          <label>Correo de Ingreso *</label>
+          <input type="email" formControlName="admin_email" class="form-control" placeholder="dueño@taller.com" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña Inicial *</label>
+          <input type="text" formControlName="admin_password" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()" [disabled]="isSaving()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || isSaving()">
+          {{ isSaving() ? 'Creando...' : 'Crear Suscripción' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

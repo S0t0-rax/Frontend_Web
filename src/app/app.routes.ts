@@ -25,6 +25,11 @@ export const routes: Routes = [
     children: [
       { path: '', component: Home },
       { path: 'admin/users', component: Users, canActivate: [adminGuard] },
+      { 
+        path: 'admin/tenants', 
+        loadComponent: () => import('./dashboard/admin/tenants/tenants').then(m => m.TenantsComponent),
+        canActivate: [adminGuard]
+      },
       { path: 'admin/monitoring', component: MonitoringComponent, canActivate: [adminGuard] },
       { path: 'admin/bitacora', component: Bitacora, canActivate: [adminGuard] },
       { 
