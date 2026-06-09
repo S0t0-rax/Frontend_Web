@@ -27,11 +27,13 @@ export class ReportsComponent {
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
         this.saveFile(blob, `Reporte_${new Date().getTime()}.xlsx`);
-        this.isDownloadingExcel = false;
       },
       error: (err) => {
         console.error('Error descargando Excel:', err);
         alert('Error al generar el reporte');
+        this.isDownloadingExcel = false;
+      },
+      complete: () => {
         this.isDownloadingExcel = false;
       }
     });
@@ -43,11 +45,13 @@ export class ReportsComponent {
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
         this.saveFile(blob, `Reporte_${new Date().getTime()}.pdf`);
-        this.isDownloadingPdf = false;
       },
       error: (err) => {
         console.error('Error descargando PDF:', err);
         alert('Error al generar el reporte');
+        this.isDownloadingPdf = false;
+      },
+      complete: () => {
         this.isDownloadingPdf = false;
       }
     });
