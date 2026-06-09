@@ -90,7 +90,7 @@ export class TenantsComponent implements OnInit {
     const confirmed = await this.dialog.confirm({
       title: `${action.charAt(0).toUpperCase() + action.slice(1)} Empresa`,
       message: `¿Estás seguro de que deseas ${action} a la empresa "${tenant.name}"? ${tenant.is_active ? 'Sus empleados ya no podrán usar el sistema.' : ''}`,
-      type: tenant.is_active ? 'danger' : 'success'
+      type: tenant.is_active ? 'danger' : 'info'
     });
 
     if (confirmed) {
